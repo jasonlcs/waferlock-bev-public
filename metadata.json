@@ -1,0 +1,5 @@
+{
+  "name": "Vending Machine Consumption Tracker",
+  "description": "An application to upload vending machine transaction logs (CSV) and analyze beverage consumption patterns for individual users, providing detailed lists and statistical summaries.",
+  "requestFramePermissions": []
+}
