@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ConsumptionRecord } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
 import { ChartIcon, ListIcon, MoneyIcon, TagIcon, TrophyIcon, ClockIcon, UsersIcon } from './icons';
 
 interface ResultsDisplayProps {
@@ -9,7 +9,25 @@ interface ResultsDisplayProps {
   query: string;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const CHART_COLORS = [
+  '#172554', '#1e3a8a', '#1e40af', '#1d4ed8', '#2563eb', 
+  '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe'
+];
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="p-3 bg-surface border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-bold text-on-surface">{label}</p>
+        <p className="text-sm text-subtle">
+          {`購買次數: `}
+          <span className="font-medium" style={{ color: payload[0].fill }}>{payload[0].value}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const renderActiveShape = (props: any) => {
   const RADIAN = Math.PI / 180;
@@ -26,26 +44,18 @@ const renderActiveShape = (props: any) => {
 
   return (
     <g>
-      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill} className="font-bold">
         {payload.name}
       </text>
       <Sector
         cx={cx}
         cy={cy}
         innerRadius={innerRadius}
-        outerRadius={outerRadius}
+        outerRadius={outerRadius + 8}
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
-      />
-      <Sector
-        cx={cx}
-        cy={cy}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        innerRadius={outerRadius + 6}
-        outerRadius={outerRadius + 10}
-        fill={fill}
+        style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))' }}
       />
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
@@ -75,6 +85,10 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, allRecords, qu
     const onPieEnter = (_: any, index: number) => {
         setActiveIndex(index);
     };
+
+    // FIX: The `activeIndex` prop is not available in recharts' PieProps type.
+    // To resolve the type error, the Pie component is cast to `any`.
+    const PieWithActiveIndex = Pie as any;
 
     const calculateStats = (data: ConsumptionRecord[]) => {
         if (data.length === 0) return null;
@@ -251,14 +265,17 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, allRecords, qu
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" fill="#3B82F6" name="購買次數" />
+                    <Tooltip cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }} content={<CustomTooltip />} />
+                    <Bar dataKey="value" name="購買次數">
+                        {userStats?.chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                    </Bar>
                 </BarChart>
             </ResponsiveContainer>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                    <Pie
+                    <PieWithActiveIndex
                         activeIndex={activeIndex}
                         activeShape={renderActiveShape}
                         data={userStats?.chartData}
@@ -271,9 +288,9 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, allRecords, qu
                         onMouseEnter={onPieEnter}
                     >
                         {userStats?.chartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                         ))}
-                    </Pie>
+                    </PieWithActiveIndex>
                 </PieChart>
             </ResponsiveContainer>
         </div>

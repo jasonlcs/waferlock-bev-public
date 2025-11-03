@@ -1,4 +1,3 @@
-
 export interface ConsumptionRecord {
   timestamp: Date;
   userId: string;
@@ -10,4 +9,10 @@ export interface ConsumptionRecord {
 export interface User {
     userId: string;
     userName:string;
+}
+
+export interface ApiCredentials {
+  projectId: string;
+  id: string;
+  password: string;
 }
