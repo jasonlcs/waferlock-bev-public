@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { ConsumptionRecord } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
-import { ChartIcon, ListIcon, MoneyIcon, TagIcon } from './icons';
+import { ChartIcon, ListIcon, MoneyIcon, TagIcon, TrophyIcon, ClockIcon, UsersIcon } from './icons';
 
 interface ResultsDisplayProps {
   records: ConsumptionRecord[];
+  allRecords: ConsumptionRecord[];
   query: string;
 }
 
@@ -56,33 +57,123 @@ const renderActiveShape = (props: any) => {
   );
 };
 
+const RankedListItem: React.FC<{rank: number, text: string, value: number}> = ({ rank, text, value }) => (
+  <li className="flex items-center justify-between p-2 rounded-md transition-colors hover:bg-gray-100">
+    <div className="flex items-center gap-3">
+      <span className={`flex items-center justify-center w-6 h-6 rounded-full font-bold text-white ${
+        rank === 1 ? 'bg-yellow-400' : rank === 2 ? 'bg-gray-400' : 'bg-yellow-600'
+      }`}>{rank}</span>
+      <span className="font-medium text-on-surface">{text}</span>
+    </div>
+    <span className="font-semibold text-subtle">{value} 次</span>
+  </li>
+);
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, query }) => {
+
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, allRecords, query }) => {
     const [activeIndex, setActiveIndex] = React.useState(0);
     const onPieEnter = (_: any, index: number) => {
         setActiveIndex(index);
     };
 
-  const stats = useMemo(() => {
-    if (records.length === 0) return null;
-    
-    const totalSpent = records.reduce((sum, record) => sum + record.price, 0);
-    const totalItems = records.length;
-    
-    // FIX: Refactored beverageCounts calculation to use a forEach loop for clearer type inference, which resolves the arithmetic operation error.
-    const beverageCounts: Record<string, number> = {};
-    records.forEach(record => {
-      beverageCounts[record.beverageName] = (beverageCounts[record.beverageName] || 0) + 1;
-    });
-    
-    const chartData = Object.entries(beverageCounts)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-      
-    return { totalSpent, totalItems, chartData };
-  }, [records]);
+    const calculateStats = (data: ConsumptionRecord[]) => {
+        if (data.length === 0) return null;
+
+        const totalSpent = data.reduce((sum, record) => sum + record.price, 0);
+        const totalItems = data.length;
+        const uniqueUsers = new Set(data.map(r => r.userName)).size;
+
+        const beverageCounts: Record<string, number> = {};
+        data.forEach(record => {
+            beverageCounts[record.beverageName] = (beverageCounts[record.beverageName] || 0) + 1;
+        });
+
+        const chartData = Object.entries(beverageCounts)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
+
+        const topBeverages = chartData.slice(0, 3).map(item => ({
+            name: item.name,
+            count: item.value
+        }));
+
+        const hourCounts: number[] = Array(24).fill(0);
+        data.forEach(record => {
+            const hour = record.timestamp.getHours();
+            hourCounts[hour]++;
+        });
+
+        const popularTimes = hourCounts
+            .map((count, hour) => ({ hour, count }))
+            .filter(item => item.count > 0)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3)
+            .map(item => ({
+                timeSlot: `${String(item.hour).padStart(2, '0')}:00 - ${String(item.hour).padStart(2, '0')}:59`,
+                count: item.count
+            }));
+        
+        return { totalSpent, totalItems, uniqueUsers, chartData, topBeverages, popularTimes };
+    };
+
+  const userStats = useMemo(() => calculateStats(records), [records]);
+  const globalStats = useMemo(() => calculateStats(allRecords), [allRecords]);
+
 
   if (!query) {
+    if (allRecords.length > 0 && globalStats) {
+        return (
+             <div className="space-y-8">
+                <div className="p-6 bg-surface rounded-lg shadow-md">
+                    <h3 className="text-xl font-semibold mb-4 text-on-surface">
+                    全站數據總覽
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <StatCard icon={<UsersIcon/>} title="總使用者數" value={`${globalStats.uniqueUsers} 人`} />
+                        <StatCard icon={<MoneyIcon/>} title="總銷售金額" value={`NT$ ${globalStats.totalSpent.toLocaleString()}`} />
+                        <StatCard icon={<TagIcon/>} title="總銷售品項" value={`${globalStats.totalItems} 項`} />
+                    </div>
+                </div>
+                <div className="p-6 bg-surface rounded-lg shadow-md">
+                    <h3 className="text-xl font-semibold mb-4 text-on-surface">熱門分析 (全站)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 className="font-semibold text-lg mb-3 flex items-center gap-2 text-on-surface">
+                                <TrophyIcon className="w-6 h-6 text-yellow-500" />
+                                熱門飲料 Top 3
+                            </h4>
+                            <ul className="space-y-2">
+                                {globalStats.topBeverages.length ? globalStats.topBeverages.map((item, index) => (
+                                    <RankedListItem 
+                                        key={item.name} 
+                                        rank={index + 1} 
+                                        text={item.name} 
+                                        value={item.count} 
+                                    />
+                                )) : <p className="text-subtle">無足夠資料</p>}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-lg mb-3 flex items-center gap-2 text-on-surface">
+                                <ClockIcon className="w-6 h-6 text-blue-500" />
+                                熱門時段 Top 3
+                            </h4>
+                            <ul className="space-y-2">
+                                {globalStats.popularTimes.length ? globalStats.popularTimes.map((item, index) => (
+                                    <RankedListItem 
+                                        key={item.timeSlot} 
+                                        rank={index + 1} 
+                                        text={item.timeSlot} 
+                                        value={item.count} 
+                                    />
+                                )) : <p className="text-subtle">無足夠資料</p>}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
     return (
       <div className="text-center p-8 bg-surface rounded-lg shadow-md">
         <p className="text-subtle">請在上方搜尋框輸入使用者名稱或 ID 以查看其消費記錄。</p>
@@ -108,9 +199,47 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, query }) => {
           {userName} ({userId}) 的消費總覽
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard icon={<MoneyIcon/>} title="總消費金額" value={`NT$ ${stats?.totalSpent.toLocaleString()}`} />
-          <StatCard icon={<TagIcon/>} title="總購買品項" value={`${stats?.totalItems} 項`} />
-          <StatCard icon={<ChartIcon/>} title="最愛品項" value={stats?.chartData[0]?.name || 'N/A'} />
+          <StatCard icon={<MoneyIcon/>} title="總消費金額" value={`NT$ ${userStats?.totalSpent.toLocaleString()}`} />
+          <StatCard icon={<TagIcon/>} title="總購買品項" value={`${userStats?.totalItems} 項`} />
+          <StatCard icon={<ChartIcon/>} title="最愛品項" value={userStats?.chartData[0]?.name || 'N/A'} />
+        </div>
+      </div>
+      
+      <div className="p-6 bg-surface rounded-lg shadow-md">
+        <h3 className="text-xl font-semibold mb-4 text-on-surface">熱門分析</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h4 className="font-semibold text-lg mb-3 flex items-center gap-2 text-on-surface">
+                    <TrophyIcon className="w-6 h-6 text-yellow-500" />
+                    熱門飲料 Top 3
+                </h4>
+                <ul className="space-y-2">
+                    {userStats?.topBeverages.length ? userStats.topBeverages.map((item, index) => (
+                        <RankedListItem 
+                            key={item.name} 
+                            rank={index + 1} 
+                            text={item.name} 
+                            value={item.count} 
+                        />
+                    )) : <p className="text-subtle">無足夠資料</p>}
+                </ul>
+            </div>
+            <div>
+                <h4 className="font-semibold text-lg mb-3 flex items-center gap-2 text-on-surface">
+                    <ClockIcon className="w-6 h-6 text-blue-500" />
+                    熱門時段 Top 3
+                </h4>
+                <ul className="space-y-2">
+                    {userStats?.popularTimes.length ? userStats.popularTimes.map((item, index) => (
+                        <RankedListItem 
+                            key={item.timeSlot} 
+                            rank={index + 1} 
+                            text={item.timeSlot} 
+                            value={item.count} 
+                        />
+                    )) : <p className="text-subtle">無足夠資料</p>}
+                </ul>
+            </div>
         </div>
       </div>
 
@@ -118,7 +247,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, query }) => {
         <h3 className="text-xl font-semibold mb-4 text-on-surface">品項分佈</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats?.chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                <BarChart data={userStats?.chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis allowDecimals={false} />
@@ -132,7 +261,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, query }) => {
                     <Pie
                         activeIndex={activeIndex}
                         activeShape={renderActiveShape}
-                        data={stats?.chartData}
+                        data={userStats?.chartData}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
@@ -141,7 +270,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, query }) => {
                         dataKey="value"
                         onMouseEnter={onPieEnter}
                     >
-                        {stats?.chartData.map((entry, index) => (
+                        {userStats?.chartData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>

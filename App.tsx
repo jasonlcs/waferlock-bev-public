@@ -13,76 +13,96 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
-  const handleFileParse = useCallback(async (file: File) => {
-    const processRows = (rows: any[][]) => {
-      if (rows.length <= 1) {
-        throw new Error("檔案是空的或只包含標頭。");
-      }
-      
-      const header = rows[0].map(h => String(h).trim());
-      const requiredHeaders = ['事件時間', '人臉辨識ID', '使用者名稱', '品名', '金額'];
-      const missingHeaders = requiredHeaders.filter(h => !header.includes(h));
-
-      if (missingHeaders.length > 0) {
-        throw new Error(`檔案缺少必要的標頭: ${missingHeaders.join(', ')}`);
-      }
-
-      const timeIndex = header.indexOf('事件時間');
-      const userIdIndex = header.indexOf('人臉辨識ID');
-      const userNameIndex = header.indexOf('使用者名稱');
-      const beverageNameIndex = header.indexOf('品名');
-      const priceIndex = header.indexOf('金額');
-      
-      const data = rows.slice(1).map((row, index) => {
-          if (row.every(cell => cell === null || cell === undefined || String(cell).trim() === '')) {
-              return null;
-          }
-
-          const price = parseFloat(row[priceIndex]);
-          if (isNaN(price)) {
-              throw new Error(`第 ${index + 2} 行的金額無效: ${row[priceIndex]}`);
-          }
-          
-          const timestamp = new Date(row[timeIndex]);
-          if (isNaN(timestamp.getTime())) {
-              throw new Error(`第 ${index + 2} 行的時間戳無效: ${row[timeIndex]}`);
-          }
-
-          return {
-              timestamp: timestamp,
-              userId: String(row[userIdIndex]),
-              userName: String(row[userNameIndex]),
-              beverageName: String(row[beverageNameIndex]),
-              price: price,
-          };
-      }).filter(Boolean);
-      
-      setRecords(data as ConsumptionRecord[]);
-      setFileName(file.name);
-      setError(null);
-      setSearchQuery('');
-    };
+  const processData = useCallback((rows: any[][]): ConsumptionRecord[] => {
+    if (rows.length <= 1) {
+      throw new Error("資料是空的或只包含標頭。");
+    }
     
+    const header = rows[0].map(h => String(h).trim());
+    const requiredHeaders = ['事件時間', '人臉辨識ID', '使用者名稱', '品名', '金額'];
+    const missingHeaders = requiredHeaders.filter(h => !header.includes(h));
+
+    if (missingHeaders.length > 0) {
+      throw new Error(`資料缺少必要的標頭: ${missingHeaders.join(', ')}`);
+    }
+
+    const timeIndex = header.indexOf('事件時間');
+    const userIdIndex = header.indexOf('人臉辨識ID');
+    const userNameIndex = header.indexOf('使用者名稱');
+    const beverageNameIndex = header.indexOf('品名');
+    const priceIndex = header.indexOf('金額');
+    
+    const data = rows.slice(1).map((row, index) => {
+        if (row.every(cell => cell === null || cell === undefined || String(cell).trim() === '')) {
+            return null;
+        }
+
+        const price = parseFloat(row[priceIndex]);
+        if (isNaN(price)) {
+            throw new Error(`第 ${index + 2} 行的金額無效: ${row[priceIndex]}`);
+        }
+        
+        const timestamp = new Date(row[timeIndex]);
+        if (isNaN(timestamp.getTime())) {
+            throw new Error(`第 ${index + 2} 行的時間戳無效: ${row[timeIndex]}`);
+        }
+
+        return {
+            timestamp: timestamp,
+            userId: String(row[userIdIndex]),
+            userName: String(row[userNameIndex]),
+            beverageName: String(row[beverageNameIndex]),
+            price: price,
+        };
+    }).filter(Boolean);
+    
+    return data as ConsumptionRecord[];
+  }, []);
+
+  const handleFileParse = useCallback(async (file: File) => {
     try {
+      let rows: any[][];
       if (file.name.endsWith('.xlsx')) {
         const buffer = await file.arrayBuffer();
         const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-        processRows(rows);
+        rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
       } else {
         const text = await file.text();
         const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-        const rows = lines.map(line => line.split('\t'));
-        processRows(rows);
+        rows = lines.map(line => line.split('\t'));
       }
+      const data = processData(rows);
+      setRecords(data);
+      setFileName(file.name);
+      setError(null);
+      setSearchQuery('');
     } catch (e: any) {
         setError(e.message || "解析檔案失敗。請確保檔案格式正確。");
         setRecords([]);
         setFileName(null);
     }
-  }, []);
+  }, [processData]);
+
+  const handleTextParse = useCallback((text: string) => {
+    try {
+      if (!text.trim()) {
+        throw new Error("貼上的文字是空的。");
+      }
+      const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+      const rows = lines.map(line => line.split('\t'));
+      const data = processData(rows);
+      setRecords(data);
+      setFileName("Pasted Text Data");
+      setError(null);
+      setSearchQuery('');
+    } catch (e: any) {
+      setError(e.message || "解析貼上內容失敗。請確保資料是 Tab 分隔格式。");
+      setRecords([]);
+      setFileName(null);
+    }
+  }, [processData]);
 
   const handleReset = () => {
     setRecords([]);
@@ -125,7 +145,7 @@ const App: React.FC = () => {
           </div>
         )}
         {records.length === 0 ? (
-          <FileUpload onFileSelect={handleFileParse} />
+          <FileUpload onFileSelect={handleFileParse} onTextSubmit={handleTextParse} />
         ) : (
           <div className="space-y-8">
             <div className="p-6 bg-surface rounded-lg shadow-md flex flex-col md:flex-row justify-between items-center gap-4">
@@ -145,7 +165,7 @@ const App: React.FC = () => {
               users={allUsers}
               onUserSelect={(userName) => setSearchQuery(userName)}
             />
-            <ResultsDisplay records={filteredRecords} query={searchQuery} />
+            <ResultsDisplay records={filteredRecords} allRecords={records} query={searchQuery} />
           </div>
         )}
       </main>
