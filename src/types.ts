@@ -13,7 +13,7 @@ export interface User {
 }
 
 export interface ApiCredentials {
-  projectId: string;
+  projectID: string;
   id: string;
   password: string;
 }

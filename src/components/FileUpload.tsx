@@ -1,21 +1,35 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ServerStackIcon } from './icons';
 import { ApiCredentials } from '../types';
 
 interface ApiFormProps {
   onApiSubmit: (credentials: ApiCredentials, month: string) => void;
   isLoading: boolean;
+  hasActiveToken: boolean;
+  initialCredentials?: ApiCredentials | null;
+  onLogout?: () => void;
 }
 
-const FileUpload: React.FC<ApiFormProps> = ({ onApiSubmit, isLoading }) => {
-  const [apiCreds, setApiCreds] = useState<ApiCredentials>({ projectId: 'WFLK_CTSP', id: '', password: '' });
+const DEFAULT_CREDS: ApiCredentials = { projectID: 'WFLK_CTSP', id: '', password: '' };
+
+const FileUpload: React.FC<ApiFormProps> = ({ onApiSubmit, isLoading, hasActiveToken, initialCredentials, onLogout }) => {
+  const [apiCreds, setApiCreds] = useState<ApiCredentials>(initialCredentials ?? DEFAULT_CREDS);
   
+  useEffect(() => {
+    if (initialCredentials) {
+      setApiCreds(initialCredentials);
+    } else {
+      setApiCreds(DEFAULT_CREDS);
+    }
+  }, [initialCredentials]);
+
   // Set default to current month in YYYY-MM format
   const [month, setMonth] = useState<string>(new Date().toISOString().slice(0, 7));
 
   const handleApiSubmit = () => {
-    onApiSubmit(apiCreds, month);
+    const credsToSend = hasActiveToken && initialCredentials ? initialCredentials : apiCreds;
+    onApiSubmit(credsToSend, month);
   }
 
   const handleCredsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +40,7 @@ const FileUpload: React.FC<ApiFormProps> = ({ onApiSubmit, isLoading }) => {
     setMonth(e.target.value);
   }
 
-  const isApiFormValid = apiCreds.id && apiCreds.password && apiCreds.projectId && month;
+  const isApiFormValid = Boolean(month) && (hasActiveToken || (apiCreds.id && apiCreds.password && apiCreds.projectID));
 
   return (
     <div className="max-w-xl mx-auto text-center bg-surface p-8 rounded-lg shadow-md">
@@ -38,9 +52,25 @@ const FileUpload: React.FC<ApiFormProps> = ({ onApiSubmit, isLoading }) => {
             <ServerStackIcon className="w-6 h-6" />
             <h3>從 API 取得資料</h3>
           </div>
+          {hasActiveToken ? (
+            <div className="rounded-md border border-brand-primary/40 bg-blue-50 p-4 text-sm text-on-surface flex flex-col gap-3">
+              <p>已使用現有登入權杖。若需重新登入或切換帳號，請按下方按鈕。</p>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  disabled={isLoading}
+                  className="self-start rounded-md border border-brand-primary px-3 py-1.5 text-brand-primary hover:bg-brand-primary hover:text-white transition-colors disabled:opacity-60"
+                >
+                  重新登入
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
           <div>
-              <label className="block text-sm font-medium text-gray-700" htmlFor="projectId">Project ID</label>
-              <input type="text" name="projectId" id="projectId" value={apiCreds.projectId} onChange={handleCredsChange} disabled={isLoading} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm disabled:bg-gray-100" />
+              <label className="block text-sm font-medium text-gray-700" htmlFor="projectID">Project ID</label>
+              <input type="text" name="projectID" id="projectID" value={apiCreds.projectID} onChange={handleCredsChange} disabled={isLoading} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm disabled:bg-gray-100" />
           </div>
             <div>
               <label className="block text-sm font-medium text-gray-700" htmlFor="id">ID</label>
@@ -50,6 +80,8 @@ const FileUpload: React.FC<ApiFormProps> = ({ onApiSubmit, isLoading }) => {
               <label className="block text-sm font-medium text-gray-700" htmlFor="password">Password</label>
               <input type="password" name="password" id="password" value={apiCreds.password} onChange={handleCredsChange} disabled={isLoading} placeholder="請輸入密碼" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm disabled:bg-gray-100" />
           </div>
+            </>
+          )}
           <div>
               <label className="block text-sm font-medium text-gray-700" htmlFor="month">查詢月份</label>
               <input type="month" name="month" id="month" value={month} onChange={handleMonthChange} disabled={isLoading} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm disabled:bg-gray-100" />

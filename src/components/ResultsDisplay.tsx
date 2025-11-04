@@ -10,15 +10,28 @@ interface ResultsDisplayProps {
 }
 
 const CHART_COLORS = [
-  '#172554', '#1e3a8a', '#1e40af', '#1d4ed8', '#2563eb', 
-  '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe'
+  '#F97316', // orange
+  '#0EA5E9', // sky blue
+  '#22C55E', // emerald
+  '#A855F7', // purple
+  '#F43F5E', // rose
+  '#FACC15', // amber
+  '#14B8A6', // teal
+  '#8B5CF6', // violet
+  '#EC4899', // pink
+  '#38BDF8', // light blue
 ];
+
+const formatBeverageLabel = (label: string) => {
+  if (!label) return '';
+  return label.length > 12 ? `${label.slice(0, 12)}…` : label;
+};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="p-3 bg-surface border border-gray-200 rounded-lg shadow-lg">
-        <p className="font-bold text-on-surface">{label}</p>
+        <p className="font-bold text-on-surface">{payload[0]?.payload?.name ?? label}</p>
         <p className="text-sm text-subtle">
           {`購買次數: `}
           <span className="font-medium" style={{ color: payload[0].fill }}>{payload[0].value}</span>
@@ -261,9 +274,20 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ records, allRecords, qu
         <h3 className="text-xl font-semibold mb-4 text-on-surface">品項分佈</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={userStats?.chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                <BarChart
+                  data={userStats?.chartData}
+                  margin={{ top: 16, right: 24, left: 0, bottom: 72 }}
+                >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis
+                      dataKey="name"
+                      tickFormatter={formatBeverageLabel}
+                      tick={{ fontSize: 12, fill: '#475569' }}
+                      height={80}
+                      angle={-20}
+                      textAnchor="end"
+                      interval={0}
+                    />
                     <YAxis allowDecimals={false} />
                     <Tooltip cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }} content={<CustomTooltip />} />
                     <Bar dataKey="value" name="購買次數">
