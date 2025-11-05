@@ -1,0 +1,5 @@
+- Language: TypeScript with React functional components and hooks; strict compiler checks enabled.
+- Styling: uses Tailwind-like utility classes directly in JSX; ensure class names align with existing design tokens (e.g., `bg-background`, `text-brand-primary`).
+- Components stored in `src/components`; prefer PascalCase filenames and default component exports.
+- Types live in `src/types.ts`; favor explicit interfaces and strong typing for API data.
+- Formatting currently manual (no Prettier config); follow existing 2-space indentation and semicolon usage.

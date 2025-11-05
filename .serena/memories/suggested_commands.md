@@ -1,0 +1,6 @@
+- Install dependencies: `npm install`
+- Start dev server with hot reload: `npm run dev`
+- Production build output to `dist/`: `npm run build`
+- Preview production build locally: `npm run preview`
+- Deploy static build to GitHub Pages: `npm run deploy`
+- Format/check TypeScript types during development: rely on Vite dev server console (no dedicated lint script yet).

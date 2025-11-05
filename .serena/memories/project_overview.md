@@ -1,0 +1,5 @@
+- Purpose: React + TypeScript single-page app to fetch and visualize vending machine consumption data from the LiveAM API for Waferlock, allowing credential-based querying, filtering, and result display.
+- Key features: credential form, API data ingestion, filtering by user, results summary tables/charts via Recharts, CSV/XLSX handling utilities.
+- Stack: Vite + React 18 + TypeScript, Recharts for charts, xlsx for spreadsheet parsing, Tailwind-style utility classes in JSX, deployed via GitHub Pages with `gh-pages` script.
+- Entry point: `src/App.tsx` orchestrates API fetch and renders components located under `src/components`. Supporting configs in `vite.config.ts`, `tsconfig.json`.
+- Environment: requires Node.js and a Gemini API key stored in `.env.local` for AI Studio integration per README.

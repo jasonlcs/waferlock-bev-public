@@ -1,0 +1,4 @@
+- Run `npm run build` to ensure TypeScript compiles before opening PRs; address any type errors surfaced during dev.
+- Manually QA in `npm run dev` to validate API fetch, filtering, and UI flows (no automated tests yet).
+- Update README or AGENTS.md when changing environment variables or build steps.
+- Use Conventional Commit prefixes (e.g., `feat:`, `fix:`) to match repository history.
