@@ -13,25 +13,45 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF3E5F5), // Light purple Disney background
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 2,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF6B46C1), // Purple
+                Color(0xFF8B5CF6), // Lighter purple
+                Color(0xFFEC4899), // Pink
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 8,
+        shadowColor: Colors.purple.withValues(alpha: 0.5),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '自動販賣機消費分析系統',
+            const Text(
+              '✨ 自動販賣機消費分析系統 ✨',
               style: TextStyle(
-                color: Colors.orange.shade700,
+                color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    color: Colors.black26,
+                    offset: Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
             ),
             const Text(
               '輸入 API 憑證，即時分析使用者消費習慣',
               style: TextStyle(
-                color: Colors.grey,
+                color: Colors.white70,
                 fontSize: 12,
                 fontWeight: FontWeight.normal,
               ),
@@ -56,9 +76,20 @@ class HomeScreen extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 24),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        border: Border.all(color: Colors.red.shade300),
-                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          colors: [Colors.red.shade100, Colors.pink.shade50],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        border: Border.all(color: Colors.red.shade300, width: 2),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,8 +130,8 @@ class HomeScreen extends StatelessWidget {
                               height: 60,
                               child: CircularProgressIndicator(
                                 strokeWidth: 6,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.orange.shade700,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF8B5CF6), // Disney purple
                                 ),
                               ),
                             ),
@@ -124,13 +155,24 @@ class HomeScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFE0F2FE), // Light blue
+                                Color(0xFFFCE7F3), // Light pink
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: const Color(0xFF8B5CF6),
+                              width: 2,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.shade300,
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
+                                color: Colors.purple.withValues(alpha: 0.3),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
@@ -139,8 +181,8 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.check_circle, 
-                                    color: Colors.green.shade600,
+                                  const Icon(Icons.check_circle, 
+                                    color: Color(0xFF10B981), // Disney green
                                     size: 24,
                                   ),
                                   const SizedBox(width: 12),
@@ -171,12 +213,12 @@ class HomeScreen extends StatelessWidget {
                                           ),
                                         );
                                       },
-                                      icon: Icon(Icons.qr_code, size: 16, color: Colors.orange.shade700),
-                                      label: Text(
-                                        '分享QR',
+                                      icon: const Icon(Icons.qr_code, size: 16, color: Color(0xFF8B5CF6)),
+                                      label: const Text(
+                                        '✨ 分享QR',
                                         style: TextStyle(
                                           fontSize: 13,
-                                          color: Colors.orange.shade700,
+                                          color: Color(0xFF8B5CF6),
                                         ),
                                       ),
                                     ),
