@@ -103,10 +103,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('掃描 QR 碼'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
+        title: const Text('✨ 掃描 QR 碼'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF6B46C1), // Purple
+                Color(0xFF8B5CF6), // Lighter purple
+                Color(0xFFEC4899), // Pink
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shadowColor: Colors.purple.withValues(alpha: 0.5),
       ),
       body: Stack(
         children: [

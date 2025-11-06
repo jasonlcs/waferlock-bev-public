@@ -32,10 +32,10 @@ class ResultsDisplayWidget extends StatelessWidget {
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.info_outline, size: 64, color: Colors.grey.shade400),
+                  Icon(Icons.info_outline, size: 64, color: const Color(0xFF8B5CF6)),
                   const SizedBox(height: 16),
                   const Text(
-                    '請在上方搜尋框輸入使用者名稱或 ID 以查看其消費記錄。',
+                    '✨ 請在上方搜尋框輸入使用者名稱或 ID 以查看其消費記錄。',
                     style: TextStyle(color: Colors.grey, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
@@ -64,7 +64,7 @@ class ResultsDisplayWidget extends StatelessWidget {
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+                  Icon(Icons.search_off, size: 64, color: const Color(0xFF8B5CF6)),
                   const SizedBox(height: 16),
                   Text(
                     '找不到符合 "${dataProvider.searchQuery}" 的使用者記錄。',
@@ -107,11 +107,20 @@ class ResultsDisplayWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.analytics, color: Colors.orange.shade700),
-                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.analytics, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
                   const Text(
-                    '全站數據總覽',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    '✨ 全站數據總覽',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
                   ),
                 ],
               ),
@@ -201,12 +210,21 @@ class ResultsDisplayWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.person, color: Colors.orange.shade700),
-                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.person, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '$userName ($userId) 的消費總覽',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      '✨ $userName ($userId) 的消費總覽',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
                     ),
                   ),
                 ],
@@ -282,21 +300,40 @@ class ResultsDisplayWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.orange.shade50, Colors.white],
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFDDD6FE), // Light purple
+            Color(0xFFFCE7F3), // Light pink
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange.shade200),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF8B5CF6), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.shade700,
-              borderRadius: BorderRadius.circular(8),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.purple.withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Icon(icon, color: Colors.white, size: 24),
           ),
@@ -316,10 +353,10 @@ class ResultsDisplayWidget extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade900,
+                    color: Color(0xFF6B46C1),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -339,13 +376,24 @@ class ResultsDisplayWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFFFFF),
+            Color(0xFFE0F2FE), // Light blue
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF8B5CF6),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.purple.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -354,11 +402,20 @@ class ResultsDisplayWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.trending_up, color: Colors.orange.shade700),
-              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.trending_up, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
               const Text(
-                '熱門分析',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                '✨ 熱門分析',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
               ),
             ],
           ),
@@ -526,13 +583,24 @@ class ResultsDisplayWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFFFFF),
+            Color(0xFFFCE7F3), // Light pink
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF8B5CF6),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.purple.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -541,11 +609,20 @@ class ResultsDisplayWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.pie_chart, color: Colors.orange.shade700),
-              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.pie_chart, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
               const Text(
-                '品項分佈',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                '✨ 品項分佈',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
               ),
             ],
           ),
@@ -772,13 +849,24 @@ class ResultsDisplayWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFFFFF),
+            Color(0xFFE0F2FE), // Light blue
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF8B5CF6),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.purple.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -787,11 +875,20 @@ class ResultsDisplayWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.list_alt, color: Colors.orange.shade700),
-              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.list_alt, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
               const Text(
-                '消費記錄',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                '✨ 消費記錄',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
               ),
               const Spacer(),
               Container(
@@ -823,11 +920,11 @@ class ResultsDisplayWidget extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              headingRowColor: WidgetStateProperty.all(Colors.orange.shade50),
+              headingRowColor: WidgetStateProperty.all(const Color(0xFFDDD6FE)), // Light purple
               dataRowMinHeight: 48,
               dataRowMaxHeight: 60,
               headingRowHeight: 56,
-              border: TableBorder.all(color: Colors.grey.shade300, width: 1),
+              border: TableBorder.all(color: const Color(0xFF8B5CF6), width: 2),
               columns: const [
                 DataColumn(
                   label: Text(
@@ -867,10 +964,10 @@ class ResultsDisplayWidget extends StatelessWidget {
                     DataCell(
                       Text(
                         'NT\$ ${record.price.toInt()}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade700,
+                          color: Color(0xFF8B5CF6),
                         ),
                       ),
                     ),
@@ -940,16 +1037,16 @@ class ResultsDisplayWidget extends StatelessWidget {
 
   Color _getChartColor(int index) {
     final colors = [
-      const Color(0xFFF97316), // orange
-      const Color(0xFF0EA5E9), // sky blue
-      const Color(0xFF22C55E), // emerald
-      const Color(0xFFA855F7), // purple
-      const Color(0xFFF43F5E), // rose
-      const Color(0xFFFACC15), // amber
-      const Color(0xFF14B8A6), // teal
-      const Color(0xFF8B5CF6), // violet
-      const Color(0xFFEC4899), // pink
-      const Color(0xFF38BDF8), // light blue
+      const Color(0xFF8B5CF6), // Disney purple
+      const Color(0xFFEC4899), // Disney pink
+      const Color(0xFF3B82F6), // Disney blue
+      const Color(0xFF10B981), // Disney green
+      const Color(0xFFFBBF24), // Disney yellow
+      const Color(0xFFF97316), // Disney orange
+      const Color(0xFF06B6D4), // Disney cyan
+      const Color(0xFFA855F7), // Light purple
+      const Color(0xFFF472B6), // Light pink
+      const Color(0xFF60A5FA), // Light blue
     ];
     return colors[index % colors.length];
   }

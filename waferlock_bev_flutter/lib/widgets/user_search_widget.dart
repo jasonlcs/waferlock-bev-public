@@ -22,13 +22,24 @@ class _UserSearchWidgetState extends State<UserSearchWidget> {
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFFFFFFFF),
+                Color(0xFFE0F2FE), // Light blue
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF8B5CF6),
+              width: 2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.shade300,
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: Colors.purple.withValues(alpha: 0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -37,13 +48,23 @@ class _UserSearchWidgetState extends State<UserSearchWidget> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.search, color: Colors.orange.shade700),
-                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.search, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
                   const Text(
-                    '查詢使用者消費記錄',
+                    '✨ 查詢使用者消費記錄',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B46C1),
                     ),
                   ),
                 ],
@@ -58,14 +79,20 @@ class _UserSearchWidgetState extends State<UserSearchWidget> {
                         child: DropdownButtonFormField<String>(
                           decoration: InputDecoration(
                             labelText: '快速選擇',
+                            labelStyle: const TextStyle(color: Color(0xFF8B5CF6)),
                             filled: true,
-                            fillColor: Colors.grey.shade50,
+                            fillColor: Colors.white,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
                             ),
                           ),
                           hint: const Text('選擇使用者'),
@@ -92,11 +119,11 @@ class _UserSearchWidgetState extends State<UserSearchWidget> {
                         icon: Icon(
                           _showSearchField ? Icons.unfold_less : Icons.search,
                           size: 18,
-                          color: Colors.grey.shade600,
+                          color: const Color(0xFF8B5CF6),
                         ),
                         label: Text(
                           _showSearchField ? '隱藏' : '搜尋',
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                          style: const TextStyle(color: Color(0xFF8B5CF6), fontSize: 13),
                         ),
                       ),
                     ],
@@ -107,20 +134,20 @@ class _UserSearchWidgetState extends State<UserSearchWidget> {
                       onChanged: dataProvider.setSearchQuery,
                       decoration: InputDecoration(
                         hintText: '搜尋使用者名稱或 ID...',
-                        prefixIcon: const Icon(Icons.person_search),
+                        prefixIcon: const Icon(Icons.person_search, color: Color(0xFFEC4899)),
                         filled: true,
-                        fillColor: Colors.grey.shade50,
+                        fillColor: Colors.white,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.orange.shade700, width: 2),
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
                         ),
                       ),
                     ),

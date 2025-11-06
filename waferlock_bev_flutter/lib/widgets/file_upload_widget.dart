@@ -88,7 +88,12 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('選擇查詢月份'),
+              title: const Text('✨ 選擇查詢月份 ✨', 
+                style: TextStyle(
+                  color: Color(0xFF6B46C1),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               content: SizedBox(
                 width: 300,
                 height: 300,
@@ -154,19 +159,28 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? Colors.orange.shade700
+                                    ? const Color(0xFF8B5CF6)
                                     : isCurrent
-                                        ? Colors.orange.shade100
+                                        ? const Color(0xFFE0E7FF)
                                         : isFuture
                                             ? Colors.grey.shade200
                                             : Colors.white,
                                 border: Border.all(
                                   color: isSelected
-                                      ? Colors.orange.shade700
-                                      : Colors.grey.shade300,
-                                  width: isSelected ? 2 : 1,
+                                      ? const Color(0xFFEC4899)
+                                      : isCurrent
+                                          ? const Color(0xFF8B5CF6)
+                                          : Colors.grey.shade300,
+                                  width: isSelected ? 3 : 2,
                                 ),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: isSelected ? [
+                                  BoxShadow(
+                                    color: Colors.purple.withValues(alpha: 0.4),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ] : [],
                               ),
                               child: Center(
                                 child: Text(
@@ -206,10 +220,13 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange.shade700,
+                    backgroundColor: const Color(0xFF8B5CF6),
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
-                  child: const Text('確定'),
+                  child: const Text('✨ 確定'),
                 ),
               ],
             );
@@ -232,13 +249,25 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
             constraints: const BoxConstraints(maxWidth: 600),
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFFFFFFF),
+                  Color(0xFFFCE7F3), // Light pink
+                  Color(0xFFE0F2FE), // Light blue
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: const Color(0xFF8B5CF6),
+                width: 3,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade300,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  color: Colors.purple.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
@@ -247,31 +276,44 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
-                  '開始分析',
+                  '✨ 開始分析 ✨',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    color: Color(0xFF6B46C1),
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   '輸入您的 API 憑證和查詢月份以直接從伺服器獲取販賣機的出貨記錄。',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Color(0xFF6B7280),
+                    fontSize: 14,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.dns, color: Colors.orange.shade700, size: 24),
-                    const SizedBox(width: 8),
-                    Text(
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.dns, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
                       '從 API 取得資料',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Colors.orange.shade700,
+                        color: Color(0xFF6B46C1),
                       ),
                     ),
                   ],
@@ -281,9 +323,11 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      border: Border.all(color: Colors.orange.shade300),
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFDEEDFF), Color(0xFFE0F2FE)],
+                      ),
+                      border: Border.all(color: const Color(0xFF3B82F6), width: 2),
+                      borderRadius: BorderRadius.circular(15),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,10 +340,13 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                         OutlinedButton(
                           onPressed: isLoading ? null : dataProvider.logout,
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.orange.shade700,
-                            side: BorderSide(color: Colors.orange.shade700),
+                            foregroundColor: const Color(0xFF8B5CF6),
+                            side: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
-                          child: const Text('重新登入'),
+                          child: const Text('🔄 重新登入'),
                         ),
                       ],
                     ),
@@ -311,10 +358,23 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     enableInteractiveSelection: true,
                     autocorrect: false,
                     enableSuggestions: false,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Project ID',
-                      border: OutlineInputBorder(),
+                      labelStyle: const TextStyle(color: Color(0xFF8B5CF6)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
+                      ),
                       helperText: '可複製貼上',
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -324,11 +384,24 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     enableInteractiveSelection: true,
                     autocorrect: false,
                     enableSuggestions: false,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'ID',
+                      labelStyle: const TextStyle(color: Color(0xFF8B5CF6)),
                       hintText: '請輸入登入 ID',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
+                      ),
                       helperText: '可複製貼上',
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -339,11 +412,24 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     enableInteractiveSelection: true,
                     autocorrect: false,
                     enableSuggestions: false,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Password',
+                      labelStyle: const TextStyle(color: Color(0xFF8B5CF6)),
                       hintText: '請輸入密碼',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
+                      ),
                       helperText: '可複製貼上',
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   ),
                 ],
@@ -360,9 +446,22 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                       enabled: !isLoading,
                       decoration: InputDecoration(
                         labelText: '查詢月份',
-                        border: const OutlineInputBorder(),
-                        suffixIcon: const Icon(Icons.calendar_month),
+                        labelStyle: const TextStyle(color: Color(0xFF8B5CF6)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
+                        ),
+                        suffixIcon: const Icon(Icons.calendar_month, color: Color(0xFFEC4899)),
                         helperText: '點擊選擇年月',
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
                     ),
                   ),
@@ -371,40 +470,78 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed:
-                            isFormValid && !isLoading ? () => _handleSubmit(dataProvider) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange.shade700,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          disabledBackgroundColor: Colors.grey.shade400,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.purple.withValues(alpha: 0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-                        child: Text(
-                          isLoading ? '讀取中...' : '取得資料',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        child: ElevatedButton(
+                          onPressed:
+                              isFormValid && !isLoading ? () => _handleSubmit(dataProvider) : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            disabledBackgroundColor: Colors.grey.shade400,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          child: Text(
+                            isLoading ? '讀取中...' : '✨ 取得資料 ✨',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: isLoading 
-                        ? null 
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const QRScannerScreen(),
-                              ),
-                            );
-                          },
-                      icon: const Icon(Icons.qr_code_2),
-                      label: const Text('掃描QR'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange.shade600,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                        disabledBackgroundColor: Colors.grey.shade400,
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF3B82F6), Color(0xFF06B6D4)],
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withValues(alpha: 0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: isLoading 
+                          ? null 
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const QRScannerScreen(),
+                                ),
+                              );
+                            },
+                        icon: const Icon(Icons.qr_code_2),
+                        label: const Text('掃描QR'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                          disabledBackgroundColor: Colors.grey.shade400,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
                       ),
                     ),
                   ],
