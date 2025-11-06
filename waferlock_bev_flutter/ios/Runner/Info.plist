@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>此應用需要訪問您的相機以掃描 QR 碼</string>
 </dict>
 </plist>

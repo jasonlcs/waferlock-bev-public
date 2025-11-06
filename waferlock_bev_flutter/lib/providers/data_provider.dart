@@ -32,6 +32,14 @@ class DataProvider with ChangeNotifier {
     await _apiService.loadToken();
     _cachedCredentials = await _apiService.loadCredentials();
     notifyListeners();
+    
+    // Auto-login if credentials were loaded and it's from QR login
+    if (_cachedCredentials != null && _cachedCredentials!.loginMethod == 'qr') {
+      await Future.delayed(const Duration(milliseconds: 500));
+      final now = DateTime.now();
+      final currentMonth = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+      await fetchData(_cachedCredentials!, currentMonth);
+    }
   }
   
   List<ConsumptionRecord> get filteredRecords {

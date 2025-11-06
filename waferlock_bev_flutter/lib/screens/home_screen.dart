@@ -4,6 +4,8 @@ import '../providers/data_provider.dart';
 import '../widgets/file_upload_widget.dart';
 import '../widgets/user_search_widget.dart';
 import '../widgets/results_display_widget.dart';
+import '../screens/qr_share_screen.dart';
+import '../screens/qr_scanner_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -120,7 +122,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
@@ -132,33 +134,65 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.check_circle, 
-                                color: Colors.green.shade600,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  '已載入資料來源: ${dataProvider.fileName}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
+                              Row(
+                                children: [
+                                  Icon(Icons.check_circle, 
+                                    color: Colors.green.shade600,
+                                    size: 24,
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              TextButton.icon(
-                                onPressed: dataProvider.reset,
-                                icon: Icon(Icons.refresh, size: 16, color: Colors.grey.shade600),
-                                label: Text(
-                                  '查詢新資料',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade600,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      '已載入資料來源: ${dataProvider.fileName}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (dataProvider.cachedCredentials?.loginMethod == 'manual')
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => QRShareScreen(
+                                              credentials: dataProvider.cachedCredentials!,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(Icons.qr_code, size: 16, color: Colors.orange.shade700),
+                                      label: Text(
+                                        '分享QR',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.orange.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 4),
+                                  TextButton.icon(
+                                    onPressed: dataProvider.reset,
+                                    icon: Icon(Icons.refresh, size: 16, color: Colors.grey.shade600),
+                                    label: Text(
+                                      '查詢新資料',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

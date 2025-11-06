@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/api_credentials.dart';
 import '../providers/data_provider.dart';
+import '../screens/qr_share_screen.dart';
+import '../screens/qr_scanner_screen.dart';
 
 class FileUploadWidget extends StatefulWidget {
   const FileUploadWidget({super.key});
@@ -51,6 +53,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
       projectID: _projectIDController.text,
       id: _idController.text,
       password: _passwordController.text,
+      loginMethod: 'manual',
     );
     dataProvider.fetchData(credentials, _selectedMonth);
   }
@@ -365,19 +368,46 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed:
-                      isFormValid && !isLoading ? () => _handleSubmit(dataProvider) : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange.shade700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    disabledBackgroundColor: Colors.grey.shade400,
-                  ),
-                  child: Text(
-                    isLoading ? '讀取中...' : '取得資料',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed:
+                            isFormValid && !isLoading ? () => _handleSubmit(dataProvider) : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange.shade700,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          disabledBackgroundColor: Colors.grey.shade400,
+                        ),
+                        child: Text(
+                          isLoading ? '讀取中...' : '取得資料',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: isLoading 
+                        ? null 
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const QRScannerScreen(),
+                              ),
+                            );
+                          },
+                      icon: const Icon(Icons.qr_code_2),
+                      label: const Text('掃描QR'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                        disabledBackgroundColor: Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
