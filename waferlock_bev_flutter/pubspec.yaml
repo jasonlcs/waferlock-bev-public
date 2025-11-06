@@ -16,6 +16,10 @@ dependencies:
   intl: ^0.19.0
   fl_chart: ^0.68.0
   shared_preferences: ^2.2.2
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^4.0.0
+  encrypt: ^5.0.3
+  no_screenshot: ^0.3.1
 
 dev_dependencies:
   flutter_test:
