@@ -5,7 +5,7 @@ import '../widgets/file_upload_widget.dart';
 import '../widgets/user_search_widget.dart';
 import '../widgets/results_display_widget.dart';
 import '../screens/qr_share_screen.dart';
-import '../screens/qr_scanner_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

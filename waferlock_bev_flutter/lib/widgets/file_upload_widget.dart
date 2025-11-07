@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/api_credentials.dart';
 import '../providers/data_provider.dart';
-import '../screens/qr_share_screen.dart';
+
 import '../screens/qr_scanner_screen.dart';
 
 class FileUploadWidget extends StatefulWidget {

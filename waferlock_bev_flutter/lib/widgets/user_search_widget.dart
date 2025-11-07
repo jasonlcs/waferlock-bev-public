@@ -14,8 +14,8 @@ class _UserSearchWidgetState extends State<UserSearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWideScreen = screenWidth > 800;
+
+
 
     return Consumer<DataProvider>(
       builder: (context, dataProvider, child) {
