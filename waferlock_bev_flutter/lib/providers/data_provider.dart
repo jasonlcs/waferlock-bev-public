@@ -43,7 +43,7 @@ class DataProvider with ChangeNotifier {
   }
   
   List<ConsumptionRecord> get filteredRecords {
-    if (_searchQuery.isEmpty) return [];
+    if (_searchQuery.isEmpty) return _records;
     final lowercasedQuery = _searchQuery.toLowerCase();
     return _records
         .where((record) =>
