@@ -596,12 +596,12 @@ class ResultsDisplayWidget extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.show_chart, color: Colors.white),
+                  child: const Icon(Icons.bar_chart, color: Colors.white),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  '✨ 本月每週消費金額 (${now.year}-${now.month.toString().padLeft(2, '0')})',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
+                const Text(
+                  '✨ 本月週消費',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
                 ),
               ],
             ),
@@ -637,12 +637,6 @@ class ResultsDisplayWidget extends StatelessWidget {
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
     final totalDays = lastDayOfMonth.day;
     final totalWeeks = (totalDays / 7).ceil();
-
-    // Build spots for line chart
-    final spots = <FlSpot>[];
-    for (int week = 1; week <= totalWeeks; week++) {
-      spots.add(FlSpot(week.toDouble(), weeklyAmounts[week] ?? 0.0));
-    }
 
     final maxY = weeklyAmounts.values.isEmpty ? 100.0 : weeklyAmounts.values.reduce((a, b) => a > b ? a : b) * 1.2;
 
@@ -683,12 +677,12 @@ class ResultsDisplayWidget extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.show_chart, color: Colors.white),
+                child: const Icon(Icons.bar_chart, color: Colors.white),
               ),
               const SizedBox(width: 12),
-              Text(
-                '✨ 本月每週消費金額 (${now.year}-${now.month.toString().padLeft(2, '0')})',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
+              const Text(
+                '✨ 本月週消費',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
               ),
             ],
           ),
@@ -697,23 +691,25 @@ class ResultsDisplayWidget extends StatelessWidget {
             height: 300,
             child: Padding(
               padding: const EdgeInsets.only(right: 16, top: 16, bottom: 8),
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: true,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.shade300,
-                        strokeWidth: 1,
-                      );
-                    },
-                    getDrawingVerticalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.shade300,
-                        strokeWidth: 1,
-                      );
-                    },
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: maxY,
+                  barTouchData: BarTouchData(
+                    enabled: true,
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipColor: (group) => Colors.grey.shade800,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        return BarTooltipItem(
+                          '第${groupIndex + 1}週\nNT\$ ${rod.toY.toInt()}',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   titlesData: FlTitlesData(
                     show: true,
@@ -727,15 +723,12 @@ class ResultsDisplayWidget extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: 1,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() < 1 || value.toInt() > totalWeeks) {
-                            return const SizedBox();
-                          }
+                          if (value.toInt() >= totalWeeks) return const SizedBox();
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              '第${value.toInt()}週',
+                              '第${value.toInt() + 1}週',
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -761,6 +754,16 @@ class ResultsDisplayWidget extends StatelessWidget {
                       ),
                     ),
                   ),
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.shade300,
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
                   borderData: FlBorderData(
                     show: true,
                     border: Border(
@@ -768,60 +771,28 @@ class ResultsDisplayWidget extends StatelessWidget {
                       bottom: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
-                  minX: 1,
-                  maxX: totalWeeks.toDouble(),
-                  minY: 0,
-                  maxY: maxY,
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: spots,
-                      isCurved: true,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                      ),
-                      barWidth: 3,
-                      isStrokeCapRound: true,
-                      dotData: FlDotData(
-                        show: true,
-                        getDotPainter: (spot, percent, barData, index) {
-                          return FlDotCirclePainter(
-                            radius: 5,
-                            color: Colors.white,
-                            strokeWidth: 3,
-                            strokeColor: const Color(0xFF8B5CF6),
-                          );
-                        },
-                      ),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFF8B5CF6).withValues(alpha: 0.3),
-                            const Color(0xFFEC4899).withValues(alpha: 0.1),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                  barGroups: List.generate(totalWeeks, (index) {
+                    final week = index + 1;
+                    final amount = weeklyAmounts[week] ?? 0.0;
+                    return BarChartGroupData(
+                      x: index,
+                      barRods: [
+                        BarChartRodData(
+                          toY: amount,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                          ),
+                          width: 40,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(6),
+                            topRight: Radius.circular(6),
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
-                  lineTouchData: LineTouchData(
-                    touchTooltipData: LineTouchTooltipData(
-                      getTooltipColor: (touchedSpot) => Colors.grey.shade800,
-                      getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-                        return touchedBarSpots.map((barSpot) {
-                          return LineTooltipItem(
-                            '第${barSpot.x.toInt()}週\nNT\$ ${barSpot.y.toInt()}',
-                            const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          );
-                        }).toList();
-                      },
-                    ),
-                  ),
+                      ],
+                    );
+                  }),
                 ),
               ),
             ),
