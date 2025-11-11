@@ -96,7 +96,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
               ),
               content: SizedBox(
                 width: 300,
-                height: 300,
+                height: 350,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -136,7 +136,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                         shrinkWrap: true,
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
-                          childAspectRatio: 1.5,
+                          childAspectRatio: 2.0,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
                         ),

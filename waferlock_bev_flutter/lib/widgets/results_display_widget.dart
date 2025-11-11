@@ -12,39 +12,6 @@ class ResultsDisplayWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<DataProvider>(
       builder: (context, dataProvider, child) {
-        if (dataProvider.searchQuery.isEmpty) {
-          if (dataProvider.records.isNotEmpty) {
-            return _buildGlobalStats(dataProvider.records, context);
-          }
-          return Container(
-            padding: const EdgeInsets.all(48),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade300,
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(Icons.info_outline, size: 64, color: const Color(0xFF8B5CF6)),
-                  const SizedBox(height: 16),
-                  const Text(
-                    '✨ 請在上方搜尋框輸入使用者名稱或 ID 以查看其消費記錄。',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
         final filteredRecords = dataProvider.filteredRecords;
 
         if (filteredRecords.isEmpty) {
@@ -64,11 +31,11 @@ class ResultsDisplayWidget extends StatelessWidget {
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.search_off, size: 64, color: const Color(0xFF8B5CF6)),
+                  Icon(Icons.info_outline, size: 64, color: const Color(0xFF8B5CF6)),
                   const SizedBox(height: 16),
-                  Text(
-                    '找不到符合 "${dataProvider.searchQuery}" 的使用者記錄。',
-                    style: const TextStyle(color: Colors.grey, fontSize: 16),
+                  const Text(
+                    '✨ 請在上方選擇使用者或搜尋以查看消費記錄。',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -77,7 +44,13 @@ class ResultsDisplayWidget extends StatelessWidget {
           );
         }
 
-        return _buildUserStats(filteredRecords, context);
+        // Check if we're showing all data or a specific user
+        final isShowingAllData = dataProvider.searchQuery.isEmpty;
+        if (isShowingAllData) {
+          return _buildGlobalStats(filteredRecords, context);
+        } else {
+          return _buildUserStats(filteredRecords, context);
+        }
       },
     );
   }
@@ -177,6 +150,8 @@ class ResultsDisplayWidget extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: 24),
+        _buildWeeklyAmountChart(records, context),
         const SizedBox(height: 24),
         _buildHotAnalysis(stats, context),
       ],
@@ -576,6 +551,257 @@ class ResultsDisplayWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildWeeklyAmountChart(List<ConsumptionRecord> records, BuildContext context) {
+    // Get current month data
+    final now = DateTime.now();
+    final currentMonthRecords = records.where((record) {
+      return record.timestamp.year == now.year && record.timestamp.month == now.month;
+    }).toList();
+
+    if (currentMonthRecords.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFFFFFFFF),
+              Color(0xFFE0F2FE), // Light blue
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFF8B5CF6),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.purple.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.bar_chart, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  '✨ 本月週消費',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Center(
+              child: Text('本月暫無消費記錄', style: TextStyle(color: Colors.grey)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Calculate weekly amounts
+    // Week starts on Monday (ISO 8601)
+    final weeklyAmounts = <int, double>{};
+    final weekLabels = <int, String>{};
+    
+    for (var record in currentMonthRecords) {
+      // Get the week number within the month
+      final firstDayOfMonth = DateTime(now.year, now.month, 1);
+      final daysSinceStart = record.timestamp.difference(firstDayOfMonth).inDays;
+      final weekNumber = (daysSinceStart / 7).floor() + 1;
+      
+      weeklyAmounts[weekNumber] = (weeklyAmounts[weekNumber] ?? 0.0) + record.price;
+      
+      // Create week label (e.g., "第1週")
+      if (!weekLabels.containsKey(weekNumber)) {
+        weekLabels[weekNumber] = '第${weekNumber}週';
+      }
+    }
+
+    // Determine number of weeks in current month
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+    final totalDays = lastDayOfMonth.day;
+    final totalWeeks = (totalDays / 7).ceil();
+
+    final maxY = weeklyAmounts.values.isEmpty ? 100.0 : weeklyAmounts.values.reduce((a, b) => a > b ? a : b) * 1.2;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFFFFF),
+            Color(0xFFE0F2FE), // Light blue
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF8B5CF6),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.bar_chart, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '✨ 本月週消費',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 300,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16, top: 16, bottom: 8),
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: maxY,
+                  barTouchData: BarTouchData(
+                    enabled: true,
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipColor: (group) => Colors.grey.shade800,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        return BarTooltipItem(
+                          '第${groupIndex + 1}週\nNT\$ ${rod.toY.toInt()}',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        getTitlesWidget: (value, meta) {
+                          if (value.toInt() >= totalWeeks) return const SizedBox();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              '第${value.toInt() + 1}週',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 50,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            value.toInt().toString(),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.shade300,
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border(
+                      left: BorderSide(color: Colors.grey.shade300),
+                      bottom: BorderSide(color: Colors.grey.shade300),
+                    ),
+                  ),
+                  barGroups: List.generate(totalWeeks, (index) {
+                    final week = index + 1;
+                    final amount = weeklyAmounts[week] ?? 0.0;
+                    return BarChartGroupData(
+                      x: index,
+                      barRods: [
+                        BarChartRodData(
+                          toY: amount,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                          ),
+                          width: 40,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(6),
+                            topRight: Radius.circular(6),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCharts(Map<String, dynamic> stats, BuildContext context) {
     final chartData = stats['chartData'] as List<Map<String, dynamic>>;
     final isWideScreen = MediaQuery.of(context).size.width > 1000;
@@ -927,21 +1153,30 @@ class ResultsDisplayWidget extends StatelessWidget {
               border: TableBorder.all(color: const Color(0xFF8B5CF6), width: 2),
               columns: const [
                 DataColumn(
-                  label: Text(
-                    '時間',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  label: SizedBox(
+                    width: 100,
+                    child: Text(
+                      '時間',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
                   ),
                 ),
                 DataColumn(
-                  label: Text(
-                    '品名',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  label: SizedBox(
+                    width: 150,
+                    child: Text(
+                      '品名',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
                   ),
                 ),
                 DataColumn(
-                  label: Text(
-                    '價格',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  label: SizedBox(
+                    width: 80,
+                    child: Text(
+                      '價格',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
                   ),
                   numeric: true,
                 ),
@@ -950,24 +1185,38 @@ class ResultsDisplayWidget extends StatelessWidget {
                 return DataRow(
                   cells: [
                     DataCell(
-                      Text(
-                        DateFormat('MM-dd HH:mm').format(record.timestamp),
-                        style: const TextStyle(fontSize: 13),
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          DateFormat('MM-dd HH:mm').format(record.timestamp),
+                          style: const TextStyle(fontSize: 13),
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
                     DataCell(
-                      Text(
-                        record.beverageName,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                      SizedBox(
+                        width: 150,
+                        child: Text(
+                          record.beverageName,
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                          softWrap: true,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
                     DataCell(
-                      Text(
-                        'NT\$ ${record.price.toInt()}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF8B5CF6),
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          'NT\$ ${record.price.toInt()}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF8B5CF6),
+                          ),
                         ),
                       ),
                     ),

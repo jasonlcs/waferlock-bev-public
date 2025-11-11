@@ -2,15 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/data_provider.dart';
 
-class UserSearchWidget extends StatefulWidget {
+class UserSearchWidget extends StatelessWidget {
   const UserSearchWidget({super.key});
-
-  @override
-  State<UserSearchWidget> createState() => _UserSearchWidgetState();
-}
-
-class _UserSearchWidgetState extends State<UserSearchWidget> {
-  bool _showSearchField = false;
 
   @override
   Widget build(BuildContext context) {
@@ -70,89 +63,47 @@ class _UserSearchWidgetState extends State<UserSearchWidget> {
                 ],
               ),
               const SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            labelText: '快速選擇',
-                            labelStyle: const TextStyle(color: Color(0xFF8B5CF6)),
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
-                              borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
-                              borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
-                              borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
-                            ),
-                          ),
-                          hint: const Text('選擇使用者'),
-                          items: dataProvider.allUsers
-                              .map((user) => DropdownMenuItem<String>(
-                                    value: user.userName,
-                                    child: Text(user.userName),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              dataProvider.setSearchQuery(value);
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _showSearchField = !_showSearchField;
-                          });
-                        },
-                        icon: Icon(
-                          _showSearchField ? Icons.unfold_less : Icons.search,
-                          size: 18,
-                          color: const Color(0xFF8B5CF6),
-                        ),
-                        label: Text(
-                          _showSearchField ? '隱藏' : '搜尋',
-                          style: const TextStyle(color: Color(0xFF8B5CF6), fontSize: 13),
-                        ),
-                      ),
-                    ],
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: '快速選擇',
+                  labelStyle: const TextStyle(color: Color(0xFF8B5CF6)),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
                   ),
-                  if (_showSearchField) ...[
-                    const SizedBox(height: 12),
-                    TextField(
-                      onChanged: dataProvider.setSearchQuery,
-                      decoration: InputDecoration(
-                        hintText: '搜尋使用者名稱或 ID...',
-                        prefixIcon: const Icon(Icons.person_search, color: Color(0xFFEC4899)),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
-                        ),
-                      ),
-                    ),
-                  ],
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Color(0xFFEC4899), width: 2),
+                  ),
+                ),
+                hint: const Text('選擇使用者'),
+                items: [
+                  const DropdownMenuItem<String>(
+                    value: 'ALL',
+                    child: Text('ALL (全部)'),
+                  ),
+                  ...dataProvider.allUsers
+                      .map((user) => DropdownMenuItem<String>(
+                            value: user.userName,
+                            child: Text(user.userName),
+                          ))
+                      .toList(),
                 ],
+                onChanged: (value) {
+                  if (value != null) {
+                    if (value == 'ALL') {
+                      dataProvider.setSearchQuery('');
+                    } else {
+                      dataProvider.setSearchQuery(value);
+                    }
+                  }
+                },
               ),
             ],
           ),
