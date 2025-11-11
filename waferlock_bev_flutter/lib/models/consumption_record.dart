@@ -14,7 +14,7 @@ class ConsumptionRecord {
   });
 
   factory ConsumptionRecord.fromJson(Map<String, dynamic> json) {
-    // API 回傳的是 UTC 時間，需要轉換為本地時間
+    // 後端服務回傳的是 UTC 時間，需要轉換為本地時間
     // 例如: "2025-10-28T08:09:14" (UTC) -> 2025-10-28 16:09:14 (UTC+8)
     final timeString = json['eventTime'] as String;
     DateTime timestamp;

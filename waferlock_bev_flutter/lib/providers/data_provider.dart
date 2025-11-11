@@ -71,7 +71,7 @@ class DataProvider with ChangeNotifier {
   Future<void> fetchData(ApiCredentials credentials, String month) async {
     _isLoading = true;
     _error = null;
-    _loadingMessage = hasActiveToken ? '使用既有權杖取得資料...' : '正在登入...';
+    _loadingMessage = hasActiveToken ? '沿用既有登入授權取得資料...' : '正在登入...';
     notifyListeners();
     
     try {
@@ -90,14 +90,21 @@ class DataProvider with ChangeNotifier {
       }
       
       _records = records;
-      _fileName = 'API 資料 ($month)';
+      _fileName = '伺服器資料 ($month)';
       _searchQuery = '';
       _cachedCredentials = effectiveCredentials;
     } catch (e) {
-      _error = e.toString();
+      String errorMsg = e.toString();
+      
+      if (errorMsg.contains('憑證已過期')) {
+        _error = '憑證已過期，已自動嘗試重新登入並重新獲取資料。若問題持續，請重新登入。';
+      } else {
+        _error = errorMsg;
+      }
+      
       _records = [];
       _fileName = null;
-      if (e.toString().contains('401') || e.toString().contains('403')) {
+      if (errorMsg.contains('401') || errorMsg.contains('403')) {
         await _apiService.clearAuth();
         _cachedCredentials = null;
       }

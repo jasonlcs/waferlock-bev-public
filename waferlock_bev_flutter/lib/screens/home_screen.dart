@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const Text(
-              '輸入 API 憑證，即時分析使用者消費習慣',
+              '輸入連線憑證，即時分析使用者消費習慣',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 12,

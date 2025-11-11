@@ -8,7 +8,7 @@ export const Header: React.FC = () => {
                     自動販賣機消費分析系統
                 </h1>
                 <p className="text-subtle mt-1">
-                    輸入 API 憑證，即時分析使用者消費習慣
+                    輸入連線憑證，即時分析使用者消費習慣
                 </p>
             </div>
         </header>

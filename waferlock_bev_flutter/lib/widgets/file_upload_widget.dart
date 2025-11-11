@@ -286,7 +286,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  '輸入您的 API 憑證和查詢月份以直接從伺服器獲取販賣機的出貨記錄。',
+                  '輸入您的連線憑證和查詢月份以直接從伺服器獲取販賣機的出貨記錄。',
                   style: TextStyle(
                     color: Color(0xFF6B7280),
                     fontSize: 14,
@@ -309,7 +309,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      '從 API 取得資料',
+                      '啟動資料擷取',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -333,7 +333,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          '已使用現有登入權杖。若需重新登入或切換帳號，請按下方按鈕。',
+                          '目前沿用既有登入授權。若需重新登入或切換帳號，請按下方按鈕。',
                           style: TextStyle(fontSize: 14),
                         ),
                         const SizedBox(height: 12),

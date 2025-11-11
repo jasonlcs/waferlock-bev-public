@@ -44,7 +44,7 @@ const App: React.FC = () => {
     const dataUrl = `${API_BASE_URL}/api/EventVendingMaching/range`;
 
     const effectiveCredentials = credentials ?? cachedCredentials ?? credentials;
-    let currentStep = authToken ? `事件資料 API (${dataUrl})` : `登入 API (${loginUrl})`;
+    let currentStep = authToken ? `事件資料服務 (${dataUrl})` : `登入服務 (${loginUrl})`;
     let requestPayload: Record<string, unknown> | null = null;
     let token: string | null = authToken;
     let tokenForDebug = token ?? '';
@@ -85,7 +85,7 @@ const App: React.FC = () => {
 
         if (!loginResponse.ok) {
           const errorDetails = await readErrorBody(loginResponse);
-          const error = new Error(`登入 API 呼叫失敗 (${loginResponse.status} ${loginResponse.statusText})`) as ApiError;
+          const error = new Error(`登入服務呼叫失敗 (${loginResponse.status} ${loginResponse.statusText})`) as ApiError;
           error.detail = errorDetails;
           error.step = currentStep;
           error.status = loginResponse.status;
@@ -117,7 +117,7 @@ const App: React.FC = () => {
 
         token = (extractedToken || loginBody).trim().replace(/^"+|"+$/g, '');
         if (!token) {
-          const error = new Error('登入 API 回傳的 token 為空，請檢查憑證是否正確。') as ApiError;
+          const error = new Error('登入服務未回傳授權資訊，請檢查憑證是否正確。') as ApiError;
           error.detail = `原始回應: ${loginBody || '(空字串)'}`;
           error.step = currentStep;
           error.status = 401;
@@ -126,15 +126,15 @@ const App: React.FC = () => {
         setAuthToken(token);
         setCachedCredentials(effectiveCredentials);
         tokenForDebug = token;
-        currentStep = `事件資料 API (${dataUrl})`;
+        currentStep = `事件資料服務 (${dataUrl})`;
         setLoadingMessage('登入成功！正在取得資料...');
       } else {
         tokenForDebug = token;
         if (!cachedCredentials) {
           setCachedCredentials(effectiveCredentials);
         }
-        setLoadingMessage('使用既有權杖取得資料...');
-        currentStep = `事件資料 API (${dataUrl})`;
+        setLoadingMessage('沿用既有登入授權取得資料...');
+        currentStep = `事件資料服務 (${dataUrl})`;
       }
 
       requestPayload = {
@@ -155,7 +155,7 @@ const App: React.FC = () => {
 
       if (!dataResponse.ok) {
         const errorDetails = await readErrorBody(dataResponse);
-        const error = new Error(`事件資料 API 呼叫失敗 (${dataResponse.status} ${dataResponse.statusText})`) as ApiError;
+        const error = new Error(`事件資料服務呼叫失敗 (${dataResponse.status} ${dataResponse.statusText})`) as ApiError;
         error.detail = errorDetails;
         error.step = currentStep;
         error.status = dataResponse.status;
@@ -165,8 +165,8 @@ const App: React.FC = () => {
       const apiData = await dataResponse.json();
 
       if (!Array.isArray(apiData)) {
-        console.error('Unexpected API response format', apiData);
-        throw new Error(`事件資料 API 回應格式不正確，預期為陣列，實際為 ${typeof apiData}`);
+        console.error('Unexpected service response format', apiData);
+        throw new Error(`事件資料服務回應格式不正確，預期為陣列，實際為 ${typeof apiData}`);
       }
 
       const processedData: ConsumptionRecord[] = apiData
@@ -205,19 +205,19 @@ const App: React.FC = () => {
       }
 
       setRecords(processedData);
-      setFileName(`API 資料 (${month})`);
+      setFileName(`伺服器資料 (${month})`);
       setSearchQuery('');
     } catch (err: unknown) {
       console.error('取得資料失敗', err);
       const apiError = err as ApiError;
-      let summary = "從 API 取得資料時發生未知的錯誤。";
+      let summary = "從遠端服務取得資料時發生未知的錯誤。";
       const step = apiError?.step ?? currentStep;
       const detailSections: string[] = [];
 
       if (apiError?.detail) {
         detailSections.push(`伺服器回應:\n${apiError.detail}`);
       } else if (loginResponseBody) {
-        detailSections.push(`登入 API 回應:\n${loginResponseBody}`);
+        detailSections.push(`登入服務回應:\n${loginResponseBody}`);
       }
 
       if (err instanceof Error) {
@@ -241,7 +241,7 @@ const App: React.FC = () => {
         detailSections.push(`Request Body:\n${JSON.stringify(requestPayload, null, 2)}`);
       }
       if (apiError?.status === 401 || apiError?.status === 403) {
-        detailSections.push('權杖可能已失效，已重新顯示登入表單。');
+        detailSections.push('登入授權可能已失效，已重新顯示登入表單。');
         setAuthToken(null);
         setCachedCredentials(null);
       }

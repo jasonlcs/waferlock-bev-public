@@ -45,16 +45,16 @@ const FileUpload: React.FC<ApiFormProps> = ({ onApiSubmit, isLoading, hasActiveT
   return (
     <div className="max-w-xl mx-auto text-center bg-surface p-8 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">開始分析</h2>
-      <p className="text-subtle mb-6">輸入您的 API 憑證和查詢月份以直接從伺服器獲取販賣機的出貨記錄。</p>
+      <p className="text-subtle mb-6">輸入您的連線憑證和查詢月份以直接從伺服器獲取販賣機的出貨記錄。</p>
       
       <div className="text-left space-y-4">
           <div className="flex items-center justify-center gap-2 text-lg font-semibold text-brand-primary mb-6">
             <ServerStackIcon className="w-6 h-6" />
-            <h3>從 API 取得資料</h3>
+            <h3>啟動資料擷取</h3>
           </div>
           {hasActiveToken ? (
             <div className="rounded-md border border-brand-primary/40 bg-blue-50 p-4 text-sm text-on-surface flex flex-col gap-3">
-              <p>已使用現有登入權杖。若需重新登入或切換帳號，請按下方按鈕。</p>
+              <p>目前沿用既有登入授權。若需重新登入或切換帳號，請按下方按鈕。</p>
               {onLogout && (
                 <button
                   type="button"

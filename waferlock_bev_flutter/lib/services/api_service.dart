@@ -61,7 +61,20 @@ class ApiService {
     
     _authToken ??= await _login(credentials);
     
-    return await _fetchConsumptionData(month);
+    try {
+      return await _fetchConsumptionData(month);
+    } catch (e) {
+      // If token expired (401/403), attempt to re-authenticate with saved credentials
+      if ((e.toString().contains('401') || e.toString().contains('403'))) {
+        final savedCredentials = await loadCredentials();
+        if (savedCredentials != null) {
+          await _clearToken();
+          _authToken = await _login(savedCredentials);
+          return await _fetchConsumptionData(month);
+        }
+      }
+      rethrow;
+    }
   }
   
   Future<String> _login(ApiCredentials credentials) async {
@@ -101,7 +114,7 @@ class ApiService {
     token = token.replaceAll(RegExp(r'^"+|"+$'), '');
     
     if (token.isEmpty) {
-      throw Exception('登入 API 回傳的 token 為空，請檢查憑證是否正確。');
+      throw Exception('登入服務未回傳授權資訊，請檢查憑證是否正確。');
     }
     
     await _saveToken(token);
@@ -138,6 +151,7 @@ class ApiService {
     if (response.statusCode != 200) {
       if (response.statusCode == 401 || response.statusCode == 403) {
         await _clearToken();
+        throw Exception('憑證已過期: ${response.statusCode} ${response.reasonPhrase}');
       }
       throw Exception('取得資料失敗: ${response.statusCode} ${response.reasonPhrase}\n${response.body}');
     }
