@@ -151,6 +151,8 @@ class ResultsDisplayWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
+        _buildWeeklyAmountChart(records, context),
+        const SizedBox(height: 24),
         _buildHotAnalysis(stats, context),
       ],
     );
@@ -259,8 +261,6 @@ class ResultsDisplayWidget extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 24),
-        _buildDailyAmountChart(records, context),
         const SizedBox(height: 24),
         _buildHotAnalysis(stats, context),
         const SizedBox(height: 24),
@@ -551,7 +551,7 @@ class ResultsDisplayWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDailyAmountChart(List<ConsumptionRecord> records, BuildContext context) {
+  Widget _buildWeeklyAmountChart(List<ConsumptionRecord> records, BuildContext context) {
     // Get current month data
     final now = DateTime.now();
     final currentMonthRecords = records.where((record) {
@@ -600,7 +600,7 @@ class ResultsDisplayWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '✨ 本月每日消費金額 (${now.year}-${now.month.toString().padLeft(2, '0')})',
+                  '✨ 本月每週消費金額 (${now.year}-${now.month.toString().padLeft(2, '0')})',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
                 ),
               ],
@@ -614,23 +614,37 @@ class ResultsDisplayWidget extends StatelessWidget {
       );
     }
 
-    // Calculate daily amounts
-    final dailyAmounts = <int, double>{};
+    // Calculate weekly amounts
+    // Week starts on Monday (ISO 8601)
+    final weeklyAmounts = <int, double>{};
+    final weekLabels = <int, String>{};
+    
     for (var record in currentMonthRecords) {
-      final day = record.timestamp.day;
-      dailyAmounts[day] = (dailyAmounts[day] ?? 0.0) + record.price;
+      // Get the week number within the month
+      final firstDayOfMonth = DateTime(now.year, now.month, 1);
+      final daysSinceStart = record.timestamp.difference(firstDayOfMonth).inDays;
+      final weekNumber = (daysSinceStart / 7).floor() + 1;
+      
+      weeklyAmounts[weekNumber] = (weeklyAmounts[weekNumber] ?? 0.0) + record.price;
+      
+      // Create week label (e.g., "第1週")
+      if (!weekLabels.containsKey(weekNumber)) {
+        weekLabels[weekNumber] = '第${weekNumber}週';
+      }
     }
 
-    // Get days in current month
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    
+    // Determine number of weeks in current month
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+    final totalDays = lastDayOfMonth.day;
+    final totalWeeks = (totalDays / 7).ceil();
+
     // Build spots for line chart
     final spots = <FlSpot>[];
-    for (int day = 1; day <= daysInMonth; day++) {
-      spots.add(FlSpot(day.toDouble(), dailyAmounts[day] ?? 0.0));
+    for (int week = 1; week <= totalWeeks; week++) {
+      spots.add(FlSpot(week.toDouble(), weeklyAmounts[week] ?? 0.0));
     }
 
-    final maxY = dailyAmounts.values.isEmpty ? 100.0 : dailyAmounts.values.reduce((a, b) => a > b ? a : b) * 1.2;
+    final maxY = weeklyAmounts.values.isEmpty ? 100.0 : weeklyAmounts.values.reduce((a, b) => a > b ? a : b) * 1.2;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -673,7 +687,7 @@ class ResultsDisplayWidget extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                '✨ 本月每日消費金額 (${now.year}-${now.month.toString().padLeft(2, '0')})',
+                '✨ 本月每週消費金額 (${now.year}-${now.month.toString().padLeft(2, '0')})',
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
               ),
             ],
@@ -713,15 +727,15 @@ class ResultsDisplayWidget extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: 5,
+                        interval: 1,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() < 1 || value.toInt() > daysInMonth) {
+                          if (value.toInt() < 1 || value.toInt() > totalWeeks) {
                             return const SizedBox();
                           }
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              value.toInt().toString(),
+                              '第${value.toInt()}週',
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -755,7 +769,7 @@ class ResultsDisplayWidget extends StatelessWidget {
                     ),
                   ),
                   minX: 1,
-                  maxX: daysInMonth.toDouble(),
+                  maxX: totalWeeks.toDouble(),
                   minY: 0,
                   maxY: maxY,
                   lineBarsData: [
@@ -771,9 +785,9 @@ class ResultsDisplayWidget extends StatelessWidget {
                         show: true,
                         getDotPainter: (spot, percent, barData, index) {
                           return FlDotCirclePainter(
-                            radius: 4,
+                            radius: 5,
                             color: Colors.white,
-                            strokeWidth: 2,
+                            strokeWidth: 3,
                             strokeColor: const Color(0xFF8B5CF6),
                           );
                         },
@@ -797,7 +811,7 @@ class ResultsDisplayWidget extends StatelessWidget {
                       getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                         return touchedBarSpots.map((barSpot) {
                           return LineTooltipItem(
-                            '${now.month.toString().padLeft(2, '0')}-${barSpot.x.toInt().toString().padLeft(2, '0')}\nNT\$ ${barSpot.y.toInt()}',
+                            '第${barSpot.x.toInt()}週\nNT\$ ${barSpot.y.toInt()}',
                             const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
