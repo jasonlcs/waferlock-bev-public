@@ -226,15 +226,22 @@ class ResultsDisplayWidget extends StatelessWidget {
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: Row(
                                     children: [
-                                        Container(
-                                            width: 24,
-                                            height: 24,
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                                color: index == 0 ? const Color(0xFFFFD700) : index == 1 ? const Color(0xFFC0C0C0) : const Color(0xFFCD7F32),
-                                                shape: BoxShape.circle,
+                                        Semantics(
+                                            label: index == 0
+                                                ? '第一名 (金牌)'
+                                                : index == 1
+                                                    ? '第二名 (銀牌)'
+                                                    : '第三名 (銅牌)',
+                                            child: Container(
+                                                width: 24,
+                                                height: 24,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    color: index == 0 ? const Color(0xFFFFD700) : index == 1 ? const Color(0xFFC0C0C0) : const Color(0xFFCD7F32),
+                                                    shape: BoxShape.circle,
+                                                ),
+                                                child: Text('${index + 1}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                                             ),
-                                            child: Text('${index + 1}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(child: Text(name, style: const TextStyle(fontWeight: FontWeight.w500))),
