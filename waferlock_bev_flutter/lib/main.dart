@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
             primary: const Color(0xFF4F46E5),
             secondary: const Color(0xFF0EA5E9), // Sky 500
             surface: Colors.white,
+            // background is not directly in ColorScheme constructor in newer flutter, use surface or surfaceContainer
+            // but fromSeed generates a full scheme. We can override specific colors if needed.
             error: const Color(0xFFEF4444), // Red 500
             brightness: Brightness.light,
           ),
@@ -38,6 +40,7 @@ class MyApp extends StatelessWidget {
           cardTheme: CardThemeData(
             color: Colors.white,
             elevation: 0, // Flat by default, with border or shadow managed manually if needed, or use slight elevation
+            shadowColor: const Color(0xFF000000).withValues(alpha: 0.05),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             margin: EdgeInsets.zero,
           ),

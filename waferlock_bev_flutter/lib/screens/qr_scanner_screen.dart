@@ -114,6 +114,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
                 borderRadius: BorderRadius.circular(16),
               ),
+              child: Stack(
+                children: [
+                    // Corner markers could go here but simple border is fine
+                ],
+              ),
             ),
           ),
           Positioned(

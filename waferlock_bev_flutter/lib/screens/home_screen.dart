@@ -43,6 +43,9 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
+        actions: [
+           // Add actions if needed
+        ],
       ),
       body: Consumer<DataProvider>(
         builder: (context, dataProvider, child) {
