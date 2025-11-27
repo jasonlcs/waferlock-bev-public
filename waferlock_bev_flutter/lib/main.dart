@@ -38,7 +38,6 @@ class MyApp extends StatelessWidget {
           cardTheme: CardThemeData(
             color: Colors.white,
             elevation: 0, // Flat by default, with border or shadow managed manually if needed, or use slight elevation
-            shadowColor: const Color(0xFF000000).withValues(alpha: 0.05),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             margin: EdgeInsets.zero,
           ),
