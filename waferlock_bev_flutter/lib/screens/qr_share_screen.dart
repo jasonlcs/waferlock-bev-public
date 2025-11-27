@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:no_screenshot/no_screenshot.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../models/api_credentials.dart';
 import '../services/qr_encryption_service.dart';
@@ -18,7 +17,6 @@ class QRShareScreen extends StatefulWidget {
 }
 
 class _QRShareScreenState extends State<QRShareScreen> {
-  final _noScreenshot = NoScreenshot.instance;
   late String _encryptedData;
   Timer? _timer;
   int _remainingSeconds = 300;
@@ -26,7 +24,6 @@ class _QRShareScreenState extends State<QRShareScreen> {
   @override
   void initState() {
     super.initState();
-    _noScreenshot.screenshotOff();
     _generateQRData();
     _startTimer();
   }
@@ -59,7 +56,6 @@ class _QRShareScreenState extends State<QRShareScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    _noScreenshot.screenshotOn();
     super.dispose();
   }
 
@@ -70,189 +66,97 @@ class _QRShareScreenState extends State<QRShareScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('✨ 分享 QR 碼'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF6B46C1), // Purple
-                Color(0xFF8B5CF6), // Lighter purple
-                Color(0xFFEC4899), // Pink
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        foregroundColor: Colors.white,
-        elevation: 8,
-        shadowColor: Colors.purple.withOpacity(0.5),
+        title: const Text('分享 QR 碼'),
+        centerTitle: true,
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFF3E5F5), // Light purple
-              Color(0xFFFCE7F3), // Light pink
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+      body: Center(
         child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height - 80,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFFFFFFF),
-                        Color(0xFFFCE7F3), // Light pink
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: const Color(0xFF8B5CF6),
-                      width: 3,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.purple.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Card(
+              child: Padding(
+                  padding: const EdgeInsets.all(32),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 12),
-                      const Text(
-                        '✨ 掃描此 QR 碼快速登入 ✨',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF6B46C1),
-                        ),
+                      Icon(Icons.qr_code_2, size: 48, color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(height: 16),
+                      Text(
+                        '掃描此 QR 碼快速登入',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: const Color(0xFF8B5CF6),
-                            width: 2,
-                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
-                        child: SizedBox(
-                          width: 300,
-                          height: 300,
-                          child: CustomPaint(
-                            painter: QrPainter(
-                              data: _encryptedData,
-                              version: QrVersions.auto,
-                              errorCorrectionLevel: QrErrorCorrectLevel.H,
-                              eyeStyle: const QrEyeStyle(
-                                eyeShape: QrEyeShape.square,
-                                color: Colors.black,
-                              ),
-                              dataModuleStyle: const QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.square,
-                                color: Colors.black,
-                              ),
-                            ),
+                        child: QrImageView(
+                          data: _encryptedData,
+                          version: QrVersions.auto,
+                          size: 250,
+                          eyeStyle: QrEyeStyle(
+                            eyeShape: QrEyeShape.square,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          dataModuleStyle: const QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.square,
+                            color: Colors.black87,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFEC4899), Color(0xFFF43F5E)],
-                          ),
+                          color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          '⏱ 將在 $minutes:$seconds 後自動更新',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
+                          '更新倒數: $minutes:$seconds',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFFBBF24), width: 2),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.info_outline, 
-                            color: Colors.orange.shade700,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            '說明',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange.shade700,
-                              fontSize: 14,
+                      const SizedBox(height: 32),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.orange.shade700),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'QR 碼具有時效性，會定時自動更新。請勿分享給未經授權的人員。',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.orange.shade900,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '• 掃描此 QR 碼即可快速登入\n' 
-                        '• QR 碼具有時效性，會定時自動更新\n' 
-                        '• 請勿分享給未經授權的人員',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.orange.shade900,
-                          height: 1.6,
+                          ],
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('關閉'),
+                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                  label: const Text('關閉'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
-                    foregroundColor: Colors.grey.shade800,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

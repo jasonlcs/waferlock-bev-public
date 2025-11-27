@@ -71,13 +71,13 @@ class ResultsDisplayWidget extends StatelessWidget {
   Widget _buildUserStats(List<ConsumptionRecord> records, BuildContext context) {
     final stats = _calculateStats(records);
     final userName = records.first.userName;
-    final userId = records.first.userId;
+    // userId removed from display as requested
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          '$userName ($userId)',
+          userName,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -279,7 +279,16 @@ class ResultsDisplayWidget extends StatelessWidget {
           maxY: maxY,
           barTouchData: BarTouchData(
              touchTooltipData: BarTouchTooltipData(
-                getTooltipColor: (group) => Colors.grey.shade800,
+                getTooltipColor: (group) => Colors.grey.shade900,
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                   return BarTooltipItem(
+                     '第${groupIndex + 1}週\nNT\$ ${rod.toY.toInt()}',
+                     const TextStyle(
+                       color: Colors.white,
+                       fontWeight: FontWeight.bold,
+                     ),
+                   );
+                },
              )
           ),
           titlesData: FlTitlesData(
@@ -334,16 +343,39 @@ class ResultsDisplayWidget extends StatelessWidget {
                               maxY: chartData.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b) * 1.2,
                               barTouchData: BarTouchData(
                                 touchTooltipData: BarTouchTooltipData(
-                                    getTooltipColor: (group) => Colors.grey.shade800,
+                                    getTooltipColor: (group) => Colors.grey.shade900,
+                                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                       final name = chartData[groupIndex]['name'];
+                                       return BarTooltipItem(
+                                         '$name\n${rod.toY.toInt()} 次',
+                                         const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                       );
+                                    }
                                 )
                               ),
                               titlesData: FlTitlesData(
                                   show: true,
-                                  bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (value, meta) {
-                                      if (value.toInt() >= chartData.length) return const SizedBox();
-                                      final name = chartData[value.toInt()]['name'] as String;
-                                      return Padding(padding: const EdgeInsets.only(top: 8), child: Text(name.length > 6 ? '${name.substring(0,6)}..' : name, style: const TextStyle(fontSize: 10)));
-                                  })),
+                                  bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 60,
+                                      getTitlesWidget: (value, meta) {
+                                          if (value.toInt() >= chartData.length) return const SizedBox();
+                                          final name = chartData[value.toInt()]['name'] as String;
+                                          return Padding(
+                                            padding: const EdgeInsets.only(top: 8),
+                                            child: Transform.rotate(
+                                              angle: -0.5,
+                                              child: Text(
+                                                name.length > 8 ? '${name.substring(0,8)}..' : name,
+                                                style: const TextStyle(fontSize: 10),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ),
+                                          );
+                                      }
+                                    )
+                                  ),
                                   leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                   topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                   rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),

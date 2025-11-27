@@ -132,41 +132,106 @@ class HomeScreen extends StatelessWidget {
   Widget _buildInfoBar(BuildContext context, DataProvider dataProvider) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green.shade500, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                '資料來源: ${dataProvider.fileName}',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
-            if (dataProvider.cachedCredentials?.loginMethod == 'manual') ...[
-              TextButton.icon(
-                onPressed: () {
-                    Navigator.push(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // If space is tight (mobile), use a more compact layout
+            final isMobile = constraints.maxWidth < 600;
+            if (isMobile) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green.shade500, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '來源: ${dataProvider.fileName}',
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (dataProvider.cachedCredentials?.loginMethod == 'manual') ...[
+                        TextButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => QRShareScreen(
+                                  credentials: dataProvider.cachedCredentials!,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.qr_code, size: 16),
+                          label: const Text('分享QR'),
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      TextButton.icon(
+                        onPressed: dataProvider.reset,
+                        icon: const Icon(Icons.refresh, size: 16),
+                        label: const Text('查詢'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey.shade600,
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            }
+
+            return Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green.shade500, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '資料來源: ${dataProvider.fileName}',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (dataProvider.cachedCredentials?.loginMethod == 'manual') ...[
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                        builder: (context) => QRShareScreen(
+                          builder: (context) => QRShareScreen(
                             credentials: dataProvider.cachedCredentials!,
+                          ),
                         ),
-                        ),
-                    );
-                },
-                icon: const Icon(Icons.qr_code, size: 18),
-                label: const Text('分享QR'),
-              ),
-              const SizedBox(width: 8),
-            ],
-            TextButton.icon(
-              onPressed: dataProvider.reset,
-              icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('查詢新資料'),
-              style: TextButton.styleFrom(foregroundColor: Colors.grey.shade600),
-            ),
-          ],
+                      );
+                    },
+                    icon: const Icon(Icons.qr_code, size: 18),
+                    label: const Text('分享QR'),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                TextButton.icon(
+                  onPressed: dataProvider.reset,
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('查詢新資料'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.grey.shade600),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

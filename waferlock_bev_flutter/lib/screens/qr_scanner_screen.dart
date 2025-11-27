@@ -38,11 +38,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       if (decryptedData == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('QR 碼無效'),
-              duration: Duration(seconds: 2),
-              backgroundColor: Colors.red,
-            ),
+            const SnackBar(content: Text('QR 碼無效'), backgroundColor: Colors.red),
           );
         }
         _isProcessing = false;
@@ -56,11 +52,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       if (now - timestamp > fiveMinutesInMillis) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('QR 碼已過期，請重新產生'),
-              duration: Duration(seconds: 2),
-              backgroundColor: Colors.red,
-            ),
+            const SnackBar(content: Text('QR 碼已過期，請重新產生'), backgroundColor: Colors.red),
           );
         }
         _isProcessing = false;
@@ -76,22 +68,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
       if (mounted) {
         final dataProvider = context.read<DataProvider>();
-        
         final now = DateTime.now();
         final currentMonth = '${now.year}-${now.month.toString().padLeft(2, '0')}';
         
         Navigator.pop(context);
-        
         await dataProvider.fetchData(apiCredentials, currentMonth);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('解碼失敗: $e'),
-            duration: const Duration(seconds: 2),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('解碼失敗: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -103,23 +89,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('✨ 掃描 QR 碼'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF6B46C1), // Purple
-                Color(0xFF8B5CF6), // Lighter purple
-                Color(0xFFEC4899), // Pink
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        foregroundColor: Colors.white,
-        elevation: 8,
-        shadowColor: Colors.purple.withValues(alpha: 0.5),
+        title: const Text('掃描 QR 碼'),
+        centerTitle: true,
       ),
       body: Stack(
         children: [
@@ -135,49 +106,39 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               }
             },
           ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.orange.shade600,
-                width: 3,
+          Center(
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
+                borderRadius: BorderRadius.circular(16),
               ),
-              borderRadius: BorderRadius.circular(12),
-              shape: BoxShape.rectangle,
-              color: Colors.transparent,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.orange.shade600.withOpacity(0.3),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            margin: const EdgeInsets.fromLTRB(40, 80, 40, 80),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(9),
-              child: Container(
-                color: Colors.transparent,
+              child: Stack(
+                children: [
+                    // Corner markers could go here but simple border is fine
+                ],
               ),
             ),
           ),
           Positioned(
-            bottom: 50,
+            bottom: 80,
             left: 0,
             right: 0,
             child: Center(
-              child: Text(
-                _isProcessing ? '處理中...' : '對準 QR 碼掃描',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.7),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Text(
+                  _isProcessing ? '處理中...' : '將 QR 碼置於框內',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
