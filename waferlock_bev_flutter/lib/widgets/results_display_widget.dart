@@ -126,13 +126,13 @@ class ResultsDisplayWidget extends StatelessWidget {
             mainAxisSpacing: 16,
             children: [
                 if (isGlobal) ...[
-                    _buildStatCard(context, Icons.people_outline, '總使用者數', '${stats['uniqueUsers']} 人', Colors.blue),
-                    _buildStatCard(context, Icons.attach_money, '總銷售金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green),
-                    _buildStatCard(context, Icons.local_offer_outlined, '總銷售品項', '${stats['totalItems']} 項', Colors.orange),
+                    _buildStatCard(context, Icons.people_outline, '總使用者數', '${stats['uniqueUsers']} 人', Colors.blue, category: '使用者'),
+                    _buildStatCard(context, Icons.attach_money, '總銷售金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, category: '金額'),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總銷售品項', '${stats['totalItems']} 項', Colors.orange, category: '品項'),
                 ] else ...[
-                    _buildStatCard(context, Icons.attach_money, '總消費金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green),
-                    _buildStatCard(context, Icons.local_offer_outlined, '總購買品項', '${stats['totalItems']} 項', Colors.orange),
-                    _buildStatCard(context, Icons.favorite_outline, '最愛品項', stats['chartData'].isNotEmpty ? stats['chartData'][0]['name'] : 'N/A', Colors.pink),
+                    _buildStatCard(context, Icons.attach_money, '總消費金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, category: '金額'),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總購買品項', '${stats['totalItems']} 項', Colors.orange, category: '品項'),
+                    _buildStatCard(context, Icons.favorite_outline, '最愛品項', stats['chartData'].isNotEmpty ? stats['chartData'][0]['name'] : 'N/A', Colors.pink, category: '最愛'),
                 ]
             ],
         );
@@ -140,33 +140,59 @@ class ResultsDisplayWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color, {required String category}) {
+    return Semantics(
+      label: '$category: $title, $value',
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: color, size: 24),
+                  ),
                   const SizedBox(height: 4),
-                  Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+                    ),
+                    child: Text(
+                      category,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
