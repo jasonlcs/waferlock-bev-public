@@ -24,8 +24,6 @@ class MyApp extends StatelessWidget {
             primary: const Color(0xFF4F46E5),
             secondary: const Color(0xFF0EA5E9), // Sky 500
             surface: Colors.white,
-            // background is not directly in ColorScheme constructor in newer flutter, use surface or surfaceContainer
-            // but fromSeed generates a full scheme. We can override specific colors if needed.
             error: const Color(0xFFEF4444), // Red 500
             brightness: Brightness.light,
           ),
