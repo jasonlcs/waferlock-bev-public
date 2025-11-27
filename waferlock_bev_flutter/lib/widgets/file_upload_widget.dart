@@ -297,7 +297,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
                       controller: _idController,
                       enabled: !isLoading,
                       decoration: const InputDecoration(
-                        labelText: 'User ID',
+                        labelText: 'ID',
                         prefixIcon: Icon(Icons.person_outline, size: 20),
                       ),
                     ),
