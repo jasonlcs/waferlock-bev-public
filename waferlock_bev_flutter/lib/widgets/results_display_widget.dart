@@ -399,7 +399,7 @@ class ResultsDisplayWidget extends StatelessWidget {
                                   final percent = ((e.value['value'] as num) / total * 100);
                                   return PieChartSectionData(
                                       value: (e.value['value'] as num).toDouble(),
-                                      title: percent > 5 ? '${percent.toStringAsFixed(0)}%' : '',
+                                      title: '${percent.toStringAsFixed(0)}%',
                                       color: _getChartColor(e.key),
                                       radius: 40,
                                       titleStyle: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
