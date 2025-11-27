@@ -8,6 +8,11 @@ import '../models/consumption_record.dart';
 class ResultsDisplayWidget extends StatelessWidget {
   const ResultsDisplayWidget({super.key});
 
+  // Opacity constants for stat card visuals
+  static const double _kIconBackgroundAlpha = 0.1;
+  static const double _kBadgeBackgroundAlpha = 0.15;
+  static const double _kBadgeBorderAlpha = 0.3;
+
   @override
   Widget build(BuildContext context) {
     return Consumer<DataProvider>(
@@ -126,13 +131,13 @@ class ResultsDisplayWidget extends StatelessWidget {
             mainAxisSpacing: 16,
             children: [
                 if (isGlobal) ...[
-                    _buildStatCard(context, Icons.people_outline, '總使用者數', '${stats['uniqueUsers']} 人', Colors.blue, category: '使用者'),
-                    _buildStatCard(context, Icons.attach_money, '總銷售金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, category: '金額'),
-                    _buildStatCard(context, Icons.local_offer_outlined, '總銷售品項', '${stats['totalItems']} 項', Colors.orange, category: '品項'),
+                    _buildStatCard(context, Icons.people_outline, '總使用者數', '${stats['uniqueUsers']} 人', Colors.blue, '使用者'),
+                    _buildStatCard(context, Icons.attach_money, '總銷售金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, '金額'),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總銷售品項', '${stats['totalItems']} 項', Colors.orange, '品項'),
                 ] else ...[
-                    _buildStatCard(context, Icons.attach_money, '總消費金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, category: '金額'),
-                    _buildStatCard(context, Icons.local_offer_outlined, '總購買品項', '${stats['totalItems']} 項', Colors.orange, category: '品項'),
-                    _buildStatCard(context, Icons.favorite_outline, '最愛品項', stats['chartData'].isNotEmpty ? stats['chartData'][0]['name'] : 'N/A', Colors.pink, category: '最愛'),
+                    _buildStatCard(context, Icons.attach_money, '總消費金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, '金額'),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總購買品項', '${stats['totalItems']} 項', Colors.orange, '品項'),
+                    _buildStatCard(context, Icons.favorite_outline, '最愛品項', stats['chartData'].isNotEmpty ? stats['chartData'][0]['name'] : 'N/A', Colors.pink, '最愛'),
                 ]
             ],
         );
@@ -140,7 +145,7 @@ class ResultsDisplayWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color, {required String category}) {
+  Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color, String category) {
     return Semantics(
       label: '$category: $title, $value',
       child: Card(
@@ -154,7 +159,7 @@ class ResultsDisplayWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
+                      color: color.withValues(alpha: _kIconBackgroundAlpha),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(icon, color: color, size: 24),
@@ -163,9 +168,9 @@ class ResultsDisplayWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
+                      color: color.withValues(alpha: _kBadgeBackgroundAlpha),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+                      border: Border.all(color: color.withValues(alpha: _kBadgeBorderAlpha), width: 1),
                     ),
                     child: Text(
                       category,
