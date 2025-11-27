@@ -147,13 +147,14 @@ class ResultsDisplayWidget extends StatelessWidget {
 
   Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color, String category) {
     return Semantics(
-      label: '$category: $title, $value',
+      label: '$title: $value ($category)',
       child: Card(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
               Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
