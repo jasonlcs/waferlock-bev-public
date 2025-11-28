@@ -8,25 +8,13 @@ import '../models/consumption_record.dart';
 class ResultsDisplayWidget extends StatelessWidget {
   const ResultsDisplayWidget({super.key});
 
-  // Opacity constants for stat card visuals
-  static const double _kIconBackgroundAlpha = 0.1;
-  static const double _kBadgeBackgroundAlpha = 0.15;
-  static const double _kBadgeBorderAlpha = 0.3;
-
   @override
   Widget build(BuildContext context) {
     return Consumer<DataProvider>(
       builder: (context, dataProvider, child) {
         final filteredRecords = dataProvider.filteredRecords;
-        final hasLoadedData = dataProvider.records.isNotEmpty;
 
         if (filteredRecords.isEmpty) {
-          // Determine appropriate message based on whether data has been loaded
-          final icon = hasLoadedData ? Icons.search_off : Icons.person_search;
-          final message = hasLoadedData
-              ? '沒有找到符合的消費記錄'
-              : '請在上方選擇使用者或搜尋以查看消費記錄。';
-
           return Card(
             child: Container(
               padding: const EdgeInsets.all(48),
@@ -34,12 +22,11 @@ class ResultsDisplayWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 64, color: Colors.grey.shade300),
+                  Icon(Icons.search_off, size: 64, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
                   Text(
-                    message,
+                    '沒有找到符合的消費記錄',
                     style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -139,13 +126,13 @@ class ResultsDisplayWidget extends StatelessWidget {
             mainAxisSpacing: 16,
             children: [
                 if (isGlobal) ...[
-                    _buildStatCard(context, Icons.people_outline, '總使用者數', '${stats['uniqueUsers']} 人', Colors.blue, '使用者'),
-                    _buildStatCard(context, Icons.attach_money, '總銷售金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, '金額'),
-                    _buildStatCard(context, Icons.local_offer_outlined, '總銷售品項', '${stats['totalItems']} 項', Colors.orange, '品項'),
+                    _buildStatCard(context, Icons.people_outline, '總使用者數', '${stats['uniqueUsers']} 人', Colors.blue),
+                    _buildStatCard(context, Icons.attach_money, '總銷售金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總銷售品項', '${stats['totalItems']} 項', Colors.orange),
                 ] else ...[
-                    _buildStatCard(context, Icons.attach_money, '總消費金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green, '金額'),
-                    _buildStatCard(context, Icons.local_offer_outlined, '總購買品項', '${stats['totalItems']} 項', Colors.orange, '品項'),
-                    _buildStatCard(context, Icons.favorite_outline, '最愛品項', stats['chartData'].isNotEmpty ? stats['chartData'][0]['name'] : 'N/A', Colors.pink, '最愛'),
+                    _buildStatCard(context, Icons.attach_money, '總消費金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總購買品項', '${stats['totalItems']} 項', Colors.orange),
+                    _buildStatCard(context, Icons.favorite_outline, '最愛品項', stats['chartData'].isNotEmpty ? stats['chartData'][0]['name'] : 'N/A', Colors.pink),
                 ]
             ],
         );
@@ -153,60 +140,33 @@ class ResultsDisplayWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color, String category) {
-    return Semantics(
-      label: '$title: $value ($category)',
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
+  Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: _kIconBackgroundAlpha),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, color: color, size: 24),
-                  ),
+                  Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: _kBadgeBackgroundAlpha),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: color.withValues(alpha: _kBadgeBorderAlpha), width: 1),
-                    ),
-                    child: Text(
-                      category,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
+                  Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis)),
                 ],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
-                    const SizedBox(height: 4),
-                    Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
