@@ -13,8 +13,15 @@ class ResultsDisplayWidget extends StatelessWidget {
     return Consumer<DataProvider>(
       builder: (context, dataProvider, child) {
         final filteredRecords = dataProvider.filteredRecords;
+        final hasLoadedData = dataProvider.records.isNotEmpty;
 
         if (filteredRecords.isEmpty) {
+          // Determine appropriate message based on whether data has been loaded
+          final icon = hasLoadedData ? Icons.search_off : Icons.person_search;
+          final message = hasLoadedData
+              ? '沒有找到符合的消費記錄'
+              : '請在上方選擇使用者或搜尋以查看消費記錄。';
+
           return Card(
             child: Container(
               padding: const EdgeInsets.all(48),
@@ -22,11 +29,12 @@ class ResultsDisplayWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search_off, size: 64, color: Colors.grey.shade300),
+                  Icon(icon, size: 64, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
                   Text(
-                    '沒有找到符合的消費記錄',
+                    message,
                     style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
