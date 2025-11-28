@@ -15,28 +15,18 @@ class ResultsDisplayWidget extends StatelessWidget {
         final filteredRecords = dataProvider.filteredRecords;
 
         if (filteredRecords.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.all(48),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade300,
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(
+          return Card(
+            child: Container(
+              padding: const EdgeInsets.all(48),
+              width: double.infinity,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.info_outline, size: 64, color: const Color(0xFF8B5CF6)),
+                  Icon(Icons.search_off, size: 64, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
-                  const Text(
-                    '✨ 請在上方選擇使用者或搜尋以查看消費記錄。',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                    textAlign: TextAlign.center,
+                  Text(
+                    '沒有找到符合的消費記錄',
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
                   ),
                 ],
               ),
@@ -44,7 +34,6 @@ class ResultsDisplayWidget extends StatelessWidget {
           );
         }
 
-        // Check if we're showing all data or a specific user
         final isShowingAllData = dataProvider.searchQuery.isEmpty;
         if (isShowingAllData) {
           return _buildGlobalStats(filteredRecords, context);
@@ -57,102 +46,23 @@ class ResultsDisplayWidget extends StatelessWidget {
 
   Widget _buildGlobalStats(List<ConsumptionRecord> records, BuildContext context) {
     final stats = _calculateStats(records);
-    final isWideScreen = MediaQuery.of(context).size.width > 1000;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade300,
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.analytics, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    '✨ 全站數據總覽',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              isWideScreen
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            Icons.people,
-                            '總使用者數',
-                            '${stats['uniqueUsers']} 人',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildStatCard(
-                            Icons.attach_money,
-                            '總銷售金額',
-                            'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildStatCard(
-                            Icons.local_offer,
-                            '總銷售品項',
-                            '${stats['totalItems']} 項',
-                          ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        _buildStatCard(
-                          Icons.people,
-                          '總使用者數',
-                          '${stats['uniqueUsers']} 人',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildStatCard(
-                          Icons.attach_money,
-                          '總銷售金額',
-                          'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildStatCard(
-                          Icons.local_offer,
-                          '總銷售品項',
-                          '${stats['totalItems']} 項',
-                        ),
-                      ],
-                    ),
-            ],
+        _buildStatGrid(stats, isGlobal: true),
+        const SizedBox(height: 24),
+        _buildSectionTitle(context, '本月週消費', Icons.bar_chart),
+        const SizedBox(height: 16),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: _buildWeeklyAmountChart(records, context),
           ),
         ),
         const SizedBox(height: 24),
-        _buildWeeklyAmountChart(records, context),
-        const SizedBox(height: 24),
+        _buildSectionTitle(context, '熱門分析', Icons.trending_up),
+        const SizedBox(height: 16),
         _buildHotAnalysis(stats, context),
       ],
     );
@@ -161,184 +71,103 @@ class ResultsDisplayWidget extends StatelessWidget {
   Widget _buildUserStats(List<ConsumptionRecord> records, BuildContext context) {
     final stats = _calculateStats(records);
     final userName = records.first.userName;
-    final userId = records.first.userId;
-    final isWideScreen = MediaQuery.of(context).size.width > 1000;
+    // userId removed from display as requested
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade300,
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.person, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '✨ $userName ($userId) 的消費總覽',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              isWideScreen
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            Icons.attach_money,
-                            '總消費金額',
-                            'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildStatCard(
-                            Icons.local_offer,
-                            '總購買品項',
-                            '${stats['totalItems']} 項',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildStatCard(
-                            Icons.favorite,
-                            '最愛品項',
-                            stats['chartData'].isNotEmpty
-                                ? stats['chartData'][0]['name']
-                                : 'N/A',
-                          ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        _buildStatCard(
-                          Icons.attach_money,
-                          '總消費金額',
-                          'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildStatCard(
-                          Icons.local_offer,
-                          '總購買品項',
-                          '${stats['totalItems']} 項',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildStatCard(
-                          Icons.favorite,
-                          '最愛品項',
-                          stats['chartData'].isNotEmpty
-                              ? stats['chartData'][0]['name']
-                              : 'N/A',
-                        ),
-                      ],
-                    ),
-            ],
-          ),
+        Text(
+          userName,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
+        const SizedBox(height: 16),
+        _buildStatGrid(stats, isGlobal: false),
         const SizedBox(height: 24),
+        _buildSectionTitle(context, '熱門分析', Icons.trending_up),
+        const SizedBox(height: 16),
         _buildHotAnalysis(stats, context),
         const SizedBox(height: 24),
-        _buildCharts(stats, context),
+        _buildSectionTitle(context, '品項分佈', Icons.pie_chart),
+        const SizedBox(height: 16),
+        Card(
+           child: Padding(
+             padding: const EdgeInsets.all(24),
+             child: _buildCharts(stats, context),
+           ),
+        ),
         const SizedBox(height: 24),
-        _buildRecordsList(records),
+        _buildSectionTitle(context, '消費記錄', Icons.list_alt),
+        const SizedBox(height: 16),
+        _buildRecordsList(records, context),
       ],
     );
   }
 
-  Widget _buildStatCard(IconData icon, String title, String value) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFDDD6FE), // Light purple
-            Color(0xFFFCE7F3), // Light pink
+  Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
+      return Row(
+          children: [
+              Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF8B5CF6), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+      );
+  }
+
+  Widget _buildStatGrid(Map<String, dynamic> stats, {required bool isGlobal}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 600;
+        return GridView.count(
+            crossAxisCount: isWide ? 3 : 1,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            childAspectRatio: isWide ? 2.5 : 3,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            children: [
+                if (isGlobal) ...[
+                    _buildStatCard(context, Icons.people_outline, '總使用者數', '${stats['uniqueUsers']} 人', Colors.blue),
+                    _buildStatCard(context, Icons.attach_money, '總銷售金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總銷售品項', '${stats['totalItems']} 項', Colors.orange),
+                ] else ...[
+                    _buildStatCard(context, Icons.attach_money, '總消費金額', 'NT\$ ${NumberFormat('#,###').format(stats['totalSpent'])}', Colors.green),
+                    _buildStatCard(context, Icons.local_offer_outlined, '總購買品項', '${stats['totalItems']} 項', Colors.orange),
+                    _buildStatCard(context, Icons.favorite_outline, '最愛品項', stats['chartData'].isNotEmpty ? stats['chartData'][0]['name'] : 'N/A', Colors.pink),
+                ]
+            ],
+        );
+      }
+    );
+  }
+
+  Widget _buildStatCard(BuildContext context, IconData icon, String title, String value, Color color) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
               ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.purple.withValues(alpha: 0.4),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              child: Icon(icon, color: color, size: 24),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF6B46C1),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 4),
+                  Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis)),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -346,888 +175,283 @@ class ResultsDisplayWidget extends StatelessWidget {
   Widget _buildHotAnalysis(Map<String, dynamic> stats, BuildContext context) {
     final topBeverages = stats['topBeverages'] as List<Map<String, dynamic>>;
     final popularTimes = stats['popularTimes'] as List<Map<String, dynamic>>;
-    final isWideScreen = MediaQuery.of(context).size.width > 800;
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFE0F2FE), // Light blue
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF8B5CF6),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.trending_up, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                '✨ 熱門分析',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          isWideScreen
-              ? Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 800;
+        if (isWide) {
+            return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                    Expanded(child: _buildRankCard(context, '熱門飲料 Top 3', topBeverages, Icons.emoji_events_outlined, isTime: false)),
+                    const SizedBox(width: 24),
+                    Expanded(child: _buildRankCard(context, '熱門時段 Top 3', popularTimes, Icons.access_time, isTime: true)),
+                ],
+            );
+        } else {
+            return Column(
+                children: [
+                    _buildRankCard(context, '熱門飲料 Top 3', topBeverages, Icons.emoji_events_outlined, isTime: false),
+                    const SizedBox(height: 16),
+                    _buildRankCard(context, '熱門時段 Top 3', popularTimes, Icons.access_time, isTime: true),
+                ],
+            );
+        }
+      }
+    );
+  }
+
+  Widget _buildRankCard(BuildContext context, String title, List<Map<String, dynamic>> data, IconData icon, {required bool isTime}) {
+      return Card(
+          child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: _buildTopBeverages(topBeverages)),
-                    const SizedBox(width: 32),
-                    Expanded(child: _buildPopularTimes(popularTimes)),
+                      Row(children: [
+                          Icon(icon, size: 20, color: Colors.grey.shade700),
+                          const SizedBox(width: 8),
+                          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ]),
+                      const SizedBox(height: 24),
+                      if (data.isEmpty)
+                        const Text('無資料', style: TextStyle(color: Colors.grey))
+                      else
+                        ...data.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final item = entry.value;
+                            final name = isTime ? item['timeSlot'] : item['name'];
+                            final count = item['count'];
+                            return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Row(
+                                    children: [
+                                        Container(
+                                            width: 24,
+                                            height: 24,
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                                color: index == 0 ? const Color(0xFFFFD700) : index == 1 ? const Color(0xFFC0C0C0) : const Color(0xFFCD7F32),
+                                                shape: BoxShape.circle,
+                                            ),
+                                            child: Text('${index + 1}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(child: Text(name, style: const TextStyle(fontWeight: FontWeight.w500))),
+                                        Text('$count 次', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                                    ],
+                                ),
+                            );
+                        }),
                   ],
-                )
-              : Column(
-                  children: [
-                    _buildTopBeverages(topBeverages),
-                    const SizedBox(height: 24),
-                    _buildPopularTimes(popularTimes),
-                  ],
-                ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopBeverages(List<Map<String, dynamic>> topBeverages) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.emoji_events, color: Colors.yellow.shade700, size: 20),
-            const SizedBox(width: 8),
-            const Text(
-              '熱門飲料 Top 3',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (topBeverages.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('無足夠資料', style: TextStyle(color: Colors.grey)),
-          )
-        else
-          ...topBeverages.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return _buildRankedItem(
-              index + 1,
-              item['name'],
-              '${item['count']} 次',
-            );
-          }),
-      ],
-    );
-  }
-
-  Widget _buildPopularTimes(List<Map<String, dynamic>> popularTimes) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.access_time, color: Colors.blue.shade700, size: 20),
-            const SizedBox(width: 8),
-            const Text(
-              '熱門時段 Top 3',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (popularTimes.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('無足夠資料', style: TextStyle(color: Colors.grey)),
-          )
-        else
-          ...popularTimes.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return _buildRankedItem(
-              index + 1,
-              item['timeSlot'],
-              '${item['count']} 次',
-            );
-          }),
-      ],
-    );
-  }
-
-  Widget _buildRankedItem(int rank, String text, String value) {
-    Color bgColor;
-    if (rank == 1) {
-      bgColor = const Color(0xFFFFD700);
-    } else if (rank == 2) {
-      bgColor = const Color(0xFFC0C0C0);
-    } else {
-      bgColor = const Color(0xFFCD7F32);
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: bgColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: bgColor.withValues(alpha: 0.4),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              '$rank',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
               ),
-            ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.orange.shade700,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
+      );
   }
 
   Widget _buildWeeklyAmountChart(List<ConsumptionRecord> records, BuildContext context) {
-    // Get current month data
     final now = DateTime.now();
     final currentMonthRecords = records.where((record) {
       return record.timestamp.year == now.year && record.timestamp.month == now.month;
     }).toList();
 
     if (currentMonthRecords.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFFFFFFFF),
-              Color(0xFFE0F2FE), // Light blue
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: const Color(0xFF8B5CF6),
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.purple.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.bar_chart, color: Colors.white),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  '✨ 本月週消費',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Center(
-              child: Text('本月暫無消費記錄', style: TextStyle(color: Colors.grey)),
-            ),
-          ],
-        ),
-      );
+      return const Center(child: Text('本月暫無消費記錄', style: TextStyle(color: Colors.grey)));
     }
 
-    // Calculate weekly amounts
-    // Week starts on Monday (ISO 8601)
     final weeklyAmounts = <int, double>{};
-    final weekLabels = <int, String>{};
-    
     for (var record in currentMonthRecords) {
-      // Get the week number within the month
       final firstDayOfMonth = DateTime(now.year, now.month, 1);
       final daysSinceStart = record.timestamp.difference(firstDayOfMonth).inDays;
       final weekNumber = (daysSinceStart / 7).floor() + 1;
-      
       weeklyAmounts[weekNumber] = (weeklyAmounts[weekNumber] ?? 0.0) + record.price;
-      
-      // Create week label (e.g., "第1週")
-      if (!weekLabels.containsKey(weekNumber)) {
-        weekLabels[weekNumber] = '第${weekNumber}週';
-      }
     }
 
-    // Determine number of weeks in current month
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
-    final totalDays = lastDayOfMonth.day;
-    final totalWeeks = (totalDays / 7).ceil();
-
+    final totalWeeks = (lastDayOfMonth.day / 7).ceil();
     final maxY = weeklyAmounts.values.isEmpty ? 100.0 : weeklyAmounts.values.reduce((a, b) => a > b ? a : b) * 1.2;
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFE0F2FE), // Light blue
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF8B5CF6),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return SizedBox(
+      height: 300,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: maxY,
+          barTouchData: BarTouchData(
+             touchTooltipData: BarTouchTooltipData(
+                getTooltipColor: (group) => Theme.of(context).colorScheme.primary,
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                   return BarTooltipItem(
+                     '第${groupIndex + 1}週\nNT\$ ${rod.toY.toInt()}',
+                     const TextStyle(
+                       color: Colors.white,
+                       fontWeight: FontWeight.bold,
+                     ),
+                   );
+                },
+             )
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.bar_chart, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                '✨ 本月週消費',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 300,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16, top: 16, bottom: 8),
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: maxY,
-                  barTouchData: BarTouchData(
-                    enabled: true,
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipColor: (group) => Colors.grey.shade800,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        return BarTooltipItem(
-                          '第${groupIndex + 1}週\nNT\$ ${rod.toY.toInt()}',
-                          const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 30,
-                        getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= totalWeeks) return const SizedBox();
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              '第${value.toInt() + 1}週',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 50,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: false,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.shade300,
-                        strokeWidth: 1,
-                      );
-                    },
-                  ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border(
-                      left: BorderSide(color: Colors.grey.shade300),
-                      bottom: BorderSide(color: Colors.grey.shade300),
-                    ),
-                  ),
-                  barGroups: List.generate(totalWeeks, (index) {
-                    final week = index + 1;
-                    final amount = weeklyAmounts[week] ?? 0.0;
-                    return BarChartGroupData(
-                      x: index,
-                      barRods: [
-                        BarChartRodData(
-                          toY: amount,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                          ),
-                          width: 40,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(6),
-                            topRight: Radius.circular(6),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                   if (value.toInt() >= totalWeeks) return const SizedBox();
+                   return Padding(padding: const EdgeInsets.only(top: 8), child: Text('W${value.toInt() + 1}', style: const TextStyle(fontSize: 12)));
+                },
               ),
             ),
           ),
-        ],
+          gridData: const FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+          barGroups: List.generate(totalWeeks, (index) {
+            final week = index + 1;
+            final amount = weeklyAmounts[week] ?? 0.0;
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: amount,
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 24,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }
 
   Widget _buildCharts(Map<String, dynamic> stats, BuildContext context) {
-    final chartData = stats['chartData'] as List<Map<String, dynamic>>;
-    final isWideScreen = MediaQuery.of(context).size.width > 1000;
+      final chartData = stats['chartData'] as List<Map<String, dynamic>>;
+      if (chartData.isEmpty) return const Center(child: Text('無資料'));
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFFCE7F3), // Light pink
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF8B5CF6),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.pie_chart, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                '✨ 品項分佈',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          isWideScreen
-              ? SizedBox(
-                  height: 400,
-                  child: Row(
-                    children: [
-                      Expanded(child: _buildBarChart(chartData)),
-                      const SizedBox(width: 32),
-                      Expanded(child: _buildPieChart(chartData)),
-                    ],
-                  ),
-                )
-              : Column(
-                  children: [
-                    SizedBox(height: 350, child: _buildBarChart(chartData)),
-                    const SizedBox(height: 32),
-                    SizedBox(height: 400, child: _buildPieChart(chartData)),
-                  ],
-                ),
-        ],
-      ),
-    );
-  }
+      // Calculate max value once to avoid repeated computation
+      final maxValue = chartData.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b);
+      final maxY = maxValue * 1.2;
 
-  Widget _buildBarChart(List<Map<String, dynamic>> data) {
-    if (data.isEmpty) {
-      return const Center(
-        child: Text('無資料可顯示', style: TextStyle(color: Colors.grey)),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 16, top: 16, bottom: 8),
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.spaceAround,
-          maxY: data.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b) * 1.2,
-          barTouchData: BarTouchData(
-            enabled: true,
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => Colors.grey.shade800,
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                return BarTooltipItem(
-                  '${data[groupIndex]['name']}\n${rod.toY.toInt()} 次',
-                  const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                );
-              },
-            ),
-          ),
-          titlesData: FlTitlesData(
-            show: true,
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  if (value.toInt() >= data.length) return const SizedBox();
-                  final name = data[value.toInt()]['name'] as String;
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Transform.rotate(
-                      angle: -0.5,
-                      child: Text(
-                        name.length > 10 ? '${name.substring(0, 10)}...' : name,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                  );
-                },
-                reservedSize: 80,
-              ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 45,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    value.toInt().toString(),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  );
-                },
-              ),
-            ),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          ),
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            getDrawingHorizontalLine: (value) {
-              return FlLine(
-                color: Colors.grey.shade300,
-                strokeWidth: 1,
-              );
-            },
-          ),
-          borderData: FlBorderData(
-            show: true,
-            border: Border(
-              left: BorderSide(color: Colors.grey.shade300),
-              bottom: BorderSide(color: Colors.grey.shade300),
-            ),
-          ),
-          barGroups: data.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return BarChartGroupData(
-              x: index,
-              barRods: [
-                BarChartRodData(
-                  toY: (item['value'] as num).toDouble(),
-                  color: _getChartColor(index),
-                  width: 20,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(6),
-                    topRight: Radius.circular(6),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPieChart(List<Map<String, dynamic>> data) {
-    if (data.isEmpty) {
-      return const Center(
-        child: Text('無資料可顯示', style: TextStyle(color: Colors.grey)),
-      );
-    }
-
-    return Column(
-      children: [
-        Expanded(
-          child: PieChart(
-            PieChartData(
-              sections: data.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                final total = data.fold<num>(0, (sum, e) => sum + (e['value'] as num));
-                final percent = ((item['value'] as num) / total * 100);
-
-                return PieChartSectionData(
-                  value: (item['value'] as num).toDouble(),
-                  title: '${percent.toStringAsFixed(1)}%',
-                  color: _getChartColor(index),
-                  radius: 100,
-                  titleStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(color: Colors.black26, blurRadius: 2),
-                    ],
-                  ),
-                );
-              }).toList(),
-              sectionsSpace: 3,
-              centerSpaceRadius: 40,
-              pieTouchData: PieTouchData(
-                touchCallback: (FlTouchEvent event, pieTouchResponse) {},
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 16,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: data.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return Row(
-              mainAxisSize: MainAxisSize.min,
+      return SizedBox(
+          height: 300,
+          child: Row(
               children: [
-                Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: _getChartColor(index),
-                    borderRadius: BorderRadius.circular(4),
+                  Expanded(
+                      flex: 2,
+                      child: BarChart(
+                          BarChartData(
+                              alignment: BarChartAlignment.spaceAround,
+                              maxY: maxY,
+                              barTouchData: BarTouchData(
+                                touchTooltipData: BarTouchTooltipData(
+                                    getTooltipColor: (group) => Theme.of(context).colorScheme.primary,
+                                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                       final name = chartData[groupIndex]['name'];
+                                       return BarTooltipItem(
+                                         '$name\n${rod.toY.toInt()} 次',
+                                         const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                       );
+                                    }
+                                ),
+                              ),
+                              titlesData: FlTitlesData(
+                                  show: true,
+                                  bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 80,
+                                      getTitlesWidget: (value, meta) {
+                                          if (value.toInt() >= chartData.length) return const SizedBox();
+                                          final name = chartData[value.toInt()]['name'] as String;
+                                          // Truncate long names more aggressively to avoid overlap
+                                          final displayName = name.length > 6 ? '${name.substring(0, 6)}…' : name;
+                                          return Padding(
+                                            padding: const EdgeInsets.only(top: 8),
+                                            child: RotatedBox(
+                                              quarterTurns: -1,
+                                              child: Text(
+                                                displayName,
+                                                style: const TextStyle(fontSize: 10),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          );
+                                      }
+                                    )
+                                  ),
+                                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              ),
+                              gridData: const FlGridData(show: false),
+                              borderData: FlBorderData(show: false),
+                              barGroups: chartData.asMap().entries.map((e) {
+                                  final color = _getChartColor(e.key);
+                                  return BarChartGroupData(x: e.key, barRods: [
+                                      BarChartRodData(
+                                        toY: (e.value['value'] as num).toDouble(), 
+                                        color: color, 
+                                        width: 16, 
+                                        borderRadius: BorderRadius.circular(2),
+                                        backDrawRodData: BackgroundBarChartRodData(
+                                          show: true,
+                                          toY: maxY,
+                                          color: Colors.grey.shade100,
+                                        ),
+                                      )
+                                  ]);
+                              }).toList(),
+                          )
+                      )
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '${item['name']} (${item['value']})',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
-        ),
-      ],
-    );
+                  Expanded(
+                      flex: 1,
+                      child: PieChart(
+                          PieChartData(
+                              sections: chartData.asMap().entries.map((e) {
+                                  final total = chartData.fold<num>(0, (sum, el) => sum + (el['value'] as num));
+                                  final percent = ((e.value['value'] as num) / total * 100);
+                                  return PieChartSectionData(
+                                      value: (e.value['value'] as num).toDouble(),
+                                      title: percent > 5 ? '${percent.toStringAsFixed(0)}%' : '',
+                                      color: _getChartColor(e.key),
+                                      radius: 40,
+                                      titleStyle: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                  );
+                              }).toList(),
+                              sectionsSpace: 2,
+                              centerSpaceRadius: 30,
+                          )
+                      )
+                  )
+              ]
+          ),
+      );
   }
 
-  Widget _buildRecordsList(List<ConsumptionRecord> records) {
-    // 取得系統時區偏移量
-    final now = DateTime.now();
-    final offsetHours = now.timeZoneOffset.inHours;
-    final offsetMinutes = now.timeZoneOffset.inMinutes.remainder(60);
-    final timeZoneStr = 'UTC${offsetHours >= 0 ? '+' : ''}$offsetHours${offsetMinutes != 0 ? ':${offsetMinutes.abs().toString().padLeft(2, '0')}' : ''}';
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFE0F2FE), // Light blue
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF8B5CF6),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.list_alt, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                '✨ 消費記錄',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF6B46C1)),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.schedule, size: 14, color: Colors.blue.shade700),
-                    const SizedBox(width: 4),
-                    Text(
-                      '本地時間 ($timeZoneStr)',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.blue.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+  Widget _buildRecordsList(List<ConsumptionRecord> records, BuildContext context) {
+      return Card(
+          child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                  columns: const [
+                      DataColumn(label: Text('時間')),
+                      DataColumn(label: Text('品名')),
+                      DataColumn(label: Text('價格', maxLines: 1)),
                   ],
-                ),
+                  rows: records.map((r) {
+                      return DataRow(cells: [
+                          DataCell(Text(DateFormat('MM-dd HH:mm').format(r.timestamp))),
+                          DataCell(Text(r.beverageName)),
+                          DataCell(Text('${r.price.toInt()}')),
+                      ]);
+                  }).toList(),
               ),
-            ],
           ),
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              headingRowColor: WidgetStateProperty.all(const Color(0xFFDDD6FE)), // Light purple
-              dataRowMinHeight: 48,
-              dataRowMaxHeight: 60,
-              headingRowHeight: 56,
-              border: TableBorder.all(color: const Color(0xFF8B5CF6), width: 2),
-              columns: const [
-                DataColumn(
-                  label: SizedBox(
-                    width: 100,
-                    child: Text(
-                      '時間',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: SizedBox(
-                    width: 150,
-                    child: Text(
-                      '品名',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                  ),
-                ),
-                DataColumn(
-                  label: SizedBox(
-                    width: 80,
-                    child: Text(
-                      '價格',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                  ),
-                  numeric: true,
-                ),
-              ],
-              rows: records.map((record) {
-                return DataRow(
-                  cells: [
-                    DataCell(
-                      SizedBox(
-                        width: 100,
-                        child: Text(
-                          DateFormat('MM-dd HH:mm').format(record.timestamp),
-                          style: const TextStyle(fontSize: 13),
-                          softWrap: true,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    DataCell(
-                      SizedBox(
-                        width: 150,
-                        child: Text(
-                          record.beverageName,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                          softWrap: true,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    DataCell(
-                      SizedBox(
-                        width: 80,
-                        child: Text(
-                          'NT\$ ${record.price.toInt()}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF8B5CF6),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
+      );
   }
 
   Map<String, dynamic> _calculateStats(List<ConsumptionRecord> records) {
@@ -1285,18 +509,14 @@ class ResultsDisplayWidget extends StatelessWidget {
   }
 
   Color _getChartColor(int index) {
-    final colors = [
-      const Color(0xFF8B5CF6), // Disney purple
-      const Color(0xFFEC4899), // Disney pink
-      const Color(0xFF3B82F6), // Disney blue
-      const Color(0xFF10B981), // Disney green
-      const Color(0xFFFBBF24), // Disney yellow
-      const Color(0xFFF97316), // Disney orange
-      const Color(0xFF06B6D4), // Disney cyan
-      const Color(0xFFA855F7), // Light purple
-      const Color(0xFFF472B6), // Light pink
-      const Color(0xFF60A5FA), // Light blue
-    ];
-    return colors[index % colors.length];
+      final colors = [
+        const Color(0xFF4F46E5), // Indigo
+        const Color(0xFF0EA5E9), // Sky
+        const Color(0xFF10B981), // Emerald
+        const Color(0xFFF59E0B), // Amber
+        const Color(0xFFEC4899), // Pink
+        const Color(0xFF8B5CF6), // Violet
+      ];
+      return colors[index % colors.length];
   }
 }
