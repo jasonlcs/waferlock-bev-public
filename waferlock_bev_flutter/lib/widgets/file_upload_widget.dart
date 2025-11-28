@@ -220,141 +220,157 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
         final isLoading = dataProvider.isLoading;
         final isFormValid = _isFormValid(hasActiveToken);
 
-        return Center(
-          child: Card(
-            margin: const EdgeInsets.all(4),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 500),
-              padding: const EdgeInsets.all(40),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Column(
-                    children: [
-                       Container(
-                         padding: const EdgeInsets.all(16),
-                         decoration: BoxDecoration(
-                           color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                           shape: BoxShape.circle,
-                         ),
-                         child: Icon(Icons.cloud_upload_outlined, size: 40, color: Theme.of(context).colorScheme.primary),
-                       ),
-                       const SizedBox(height: 24),
-                       Text(
-                         '開始分析',
-                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                         textAlign: TextAlign.center,
-                       ),
-                       const SizedBox(height: 8),
-                       Text(
-                         '輸入連線憑證以獲取資料',
-                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                         textAlign: TextAlign.center,
-                       ),
-                    ],
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Reduce padding on smaller screens
+            final isCompact = constraints.maxWidth < 400;
+            final horizontalPadding = isCompact ? 24.0 : 40.0;
+            final verticalPadding = isCompact ? 24.0 : 40.0;
+            
+            return Center(
+              child: Card(
+                margin: const EdgeInsets.all(4),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding,
                   ),
-                  const SizedBox(height: 40),
-                  if (hasActiveToken) ...[
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        border: Border.all(color: Colors.blue.shade100),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Column(
                         children: [
-                          const Text(
-                            '目前已登入，可直接查詢。',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.blue),
-                          ),
-                          const SizedBox(height: 12),
-                          OutlinedButton(
-                            onPressed: isLoading ? null : dataProvider.logout,
-                            style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text('切換帳號'),
-                          ),
+                           Container(
+                             padding: EdgeInsets.all(isCompact ? 12 : 16),
+                             decoration: BoxDecoration(
+                               color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                               shape: BoxShape.circle,
+                             ),
+                             child: Icon(
+                               Icons.cloud_upload_outlined, 
+                               size: isCompact ? 32 : 40, 
+                               color: Theme.of(context).colorScheme.primary,
+                             ),
+                           ),
+                           SizedBox(height: isCompact ? 16 : 24),
+                           Text(
+                             '開始分析',
+                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                             textAlign: TextAlign.center,
+                           ),
+                           const SizedBox(height: 8),
+                           Text(
+                             '輸入連線憑證以獲取資料',
+                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                             textAlign: TextAlign.center,
+                           ),
                         ],
                       ),
-                    ),
-                  ] else ...[
-                    TextField(
-                      controller: _projectIDController,
-                      enabled: !isLoading,
-                      decoration: const InputDecoration(
-                        labelText: 'Project ID',
-                        prefixIcon: Icon(Icons.work_outline, size: 20),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _idController,
-                      enabled: !isLoading,
-                      decoration: const InputDecoration(
-                        labelText: 'User ID',
-                        prefixIcon: Icon(Icons.person_outline, size: 20),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _passwordController,
-                      enabled: !isLoading,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock_outline, size: 20),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () async {
-                      if (!isLoading) {
-                        await _selectMonth(context);
-                      }
-                    },
-                    child: AbsorbPointer(
-                      child: TextField(
-                        controller: _monthController,
-                        enabled: !isLoading,
-                        decoration: const InputDecoration(
-                          labelText: '查詢月份',
-                          prefixIcon: Icon(Icons.calendar_today_outlined, size: 20),
-                          suffixIcon: Icon(Icons.arrow_drop_down),
+                      SizedBox(height: isCompact ? 24 : 40),
+                      if (hasActiveToken) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            border: Border.all(color: Colors.blue.shade100),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '目前已登入，可直接查詢。',
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.blue),
+                              ),
+                              const SizedBox(height: 12),
+                              OutlinedButton(
+                                onPressed: isLoading ? null : dataProvider.logout,
+                                style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: const Text('切換帳號'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else ...[
+                        TextField(
+                          controller: _projectIDController,
+                          enabled: !isLoading,
+                          decoration: const InputDecoration(
+                            labelText: 'Project ID',
+                            prefixIcon: Icon(Icons.work_outline, size: 20),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _idController,
+                          enabled: !isLoading,
+                          decoration: const InputDecoration(
+                            labelText: 'User ID',
+                            prefixIcon: Icon(Icons.person_outline, size: 20),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _passwordController,
+                          enabled: !isLoading,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock_outline, size: 20),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      GestureDetector(
+                        onTap: () async {
+                          if (!isLoading) {
+                            await _selectMonth(context);
+                          }
+                        },
+                        child: AbsorbPointer(
+                          child: TextField(
+                            controller: _monthController,
+                            enabled: !isLoading,
+                            decoration: const InputDecoration(
+                              labelText: '查詢月份',
+                              prefixIcon: Icon(Icons.calendar_today_outlined, size: 20),
+                              suffixIcon: Icon(Icons.arrow_drop_down),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: isCompact ? 20 : 32),
+                      ElevatedButton(
+                        onPressed: isFormValid && !isLoading ? () => _handleSubmit(dataProvider) : null,
+                        child: Text(isLoading ? '讀取中...' : '取得資料'),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton.icon(
+                         onPressed: isLoading
+                          ? null
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const QRScannerScreen(),
+                                ),
+                              );
+                            },
+                        icon: const Icon(Icons.qr_code_scanner, size: 20),
+                        label: const Text('掃描 QR Code 登入'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: isFormValid && !isLoading ? () => _handleSubmit(dataProvider) : null,
-                    child: Text(isLoading ? '讀取中...' : '取得資料'),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton.icon(
-                     onPressed: isLoading
-                      ? null
-                      : () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const QRScannerScreen(),
-                            ),
-                          );
-                        },
-                    icon: const Icon(Icons.qr_code_scanner, size: 20),
-                    label: const Text('掃描 QR Code 登入'),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
