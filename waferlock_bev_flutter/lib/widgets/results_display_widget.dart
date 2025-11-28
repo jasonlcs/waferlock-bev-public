@@ -371,6 +371,10 @@ class ResultsDisplayWidget extends StatelessWidget {
       final chartData = stats['chartData'] as List<Map<String, dynamic>>;
       if (chartData.isEmpty) return const Center(child: Text('無資料'));
 
+      // Calculate max value once to avoid repeated computation
+      final maxValue = chartData.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b);
+      final maxY = maxValue * 1.2;
+
       return SizedBox(
           height: 300,
           child: Row(
@@ -380,7 +384,7 @@ class ResultsDisplayWidget extends StatelessWidget {
                       child: BarChart(
                           BarChartData(
                               alignment: BarChartAlignment.spaceAround,
-                              maxY: chartData.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b) * 1.2,
+                              maxY: maxY,
                               barTouchData: BarTouchData(
                                 touchTooltipData: BarTouchTooltipData(
                                     getTooltipColor: (group) => Theme.of(context).colorScheme.primary,
@@ -392,7 +396,6 @@ class ResultsDisplayWidget extends StatelessWidget {
                                        );
                                     }
                                 ),
-                                touchCallback: (event, response) {},
                               ),
                               titlesData: FlTitlesData(
                                   show: true,
@@ -435,7 +438,7 @@ class ResultsDisplayWidget extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(2),
                                         backDrawRodData: BackgroundBarChartRodData(
                                           show: true,
-                                          toY: chartData.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b) * 1.2,
+                                          toY: maxY,
                                           color: Colors.grey.shade100,
                                         ),
                                       )
