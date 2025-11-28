@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:no_screenshot/no_screenshot.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../models/api_credentials.dart';
 import '../services/qr_encryption_service.dart';
@@ -17,13 +20,23 @@ class QRShareScreen extends StatefulWidget {
 }
 
 class _QRShareScreenState extends State<QRShareScreen> {
+  final _noScreenshot = NoScreenshot.instance;
   late String _encryptedData;
   Timer? _timer;
   int _remainingSeconds = 300;
+  
+  /// Returns true if screenshot protection is supported (iOS/Android only)
+  bool get _isScreenshotProtectionSupported {
+    if (kIsWeb) return false;
+    return Platform.isIOS || Platform.isAndroid;
+  }
 
   @override
   void initState() {
     super.initState();
+    if (_isScreenshotProtectionSupported) {
+      _noScreenshot.screenshotOff();
+    }
     _generateQRData();
     _startTimer();
   }
@@ -56,6 +69,9 @@ class _QRShareScreenState extends State<QRShareScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    if (_isScreenshotProtectionSupported) {
+      _noScreenshot.screenshotOn();
+    }
     super.dispose();
   }
 
