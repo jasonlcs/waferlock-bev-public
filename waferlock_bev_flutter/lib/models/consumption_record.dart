@@ -30,10 +30,15 @@ class ConsumptionRecord {
     
     final amount = (json['amount'] as num).toDouble();
     
+    // Clean up the user name by removing trailing (number) suffix
+    String rawUserName = json['targetUserName'] ?? '';
+    // Remove patterns like " (123)" or "(123)" at the end of the name
+    rawUserName = rawUserName.replaceAll(RegExp(r'\s*\(\d+\)$'), '');
+    
     return ConsumptionRecord(
       timestamp: timestamp,
       userId: json['fid'].toString(),
-      userName: json['targetUserName'] ?? '',
+      userName: rawUserName,
       beverageName: json['productName'] ?? 'Channel ${json['channel']}' ?? '未知品項',
       price: amount,
     );

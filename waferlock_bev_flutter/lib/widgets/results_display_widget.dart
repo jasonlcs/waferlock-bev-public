@@ -279,7 +279,7 @@ class ResultsDisplayWidget extends StatelessWidget {
           maxY: maxY,
           barTouchData: BarTouchData(
              touchTooltipData: BarTouchTooltipData(
-                getTooltipColor: (group) => Colors.grey.shade900,
+                getTooltipColor: (group) => Theme.of(context).colorScheme.primary,
                 getTooltipItem: (group, groupIndex, rod, rodIndex) {
                    return BarTooltipItem(
                      '第${groupIndex + 1}週\nNT\$ ${rod.toY.toInt()}',
@@ -331,6 +331,10 @@ class ResultsDisplayWidget extends StatelessWidget {
       final chartData = stats['chartData'] as List<Map<String, dynamic>>;
       if (chartData.isEmpty) return const Center(child: Text('無資料'));
 
+      // Calculate max value once to avoid repeated computation
+      final maxValue = chartData.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b);
+      final maxY = maxValue * 1.2;
+
       return SizedBox(
           height: 300,
           child: Row(
@@ -340,10 +344,10 @@ class ResultsDisplayWidget extends StatelessWidget {
                       child: BarChart(
                           BarChartData(
                               alignment: BarChartAlignment.spaceAround,
-                              maxY: chartData.map((e) => (e['value'] as num).toDouble()).reduce((a, b) => a > b ? a : b) * 1.2,
+                              maxY: maxY,
                               barTouchData: BarTouchData(
                                 touchTooltipData: BarTouchTooltipData(
-                                    getTooltipColor: (group) => Colors.grey.shade900,
+                                    getTooltipColor: (group) => Theme.of(context).colorScheme.primary,
                                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                                        final name = chartData[groupIndex]['name'];
                                        return BarTooltipItem(
@@ -351,25 +355,27 @@ class ResultsDisplayWidget extends StatelessWidget {
                                          const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                        );
                                     }
-                                )
+                                ),
                               ),
                               titlesData: FlTitlesData(
                                   show: true,
                                   bottomTitles: AxisTitles(
                                     sideTitles: SideTitles(
                                       showTitles: true,
-                                      reservedSize: 60,
+                                      reservedSize: 80,
                                       getTitlesWidget: (value, meta) {
                                           if (value.toInt() >= chartData.length) return const SizedBox();
                                           final name = chartData[value.toInt()]['name'] as String;
+                                          // Truncate long names more aggressively to avoid overlap
+                                          final displayName = name.length > 6 ? '${name.substring(0, 6)}…' : name;
                                           return Padding(
                                             padding: const EdgeInsets.only(top: 8),
-                                            child: Transform.rotate(
-                                              angle: -0.5,
+                                            child: RotatedBox(
+                                              quarterTurns: -1,
                                               child: Text(
-                                                name.length > 8 ? '${name.substring(0,8)}..' : name,
+                                                displayName,
                                                 style: const TextStyle(fontSize: 10),
-                                                textAlign: TextAlign.right,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           );
@@ -383,8 +389,19 @@ class ResultsDisplayWidget extends StatelessWidget {
                               gridData: const FlGridData(show: false),
                               borderData: FlBorderData(show: false),
                               barGroups: chartData.asMap().entries.map((e) {
+                                  final color = _getChartColor(e.key);
                                   return BarChartGroupData(x: e.key, barRods: [
-                                      BarChartRodData(toY: (e.value['value'] as num).toDouble(), color: _getChartColor(e.key), width: 16, borderRadius: BorderRadius.circular(2))
+                                      BarChartRodData(
+                                        toY: (e.value['value'] as num).toDouble(), 
+                                        color: color, 
+                                        width: 16, 
+                                        borderRadius: BorderRadius.circular(2),
+                                        backDrawRodData: BackgroundBarChartRodData(
+                                          show: true,
+                                          toY: maxY,
+                                          color: Colors.grey.shade100,
+                                        ),
+                                      )
                                   ]);
                               }).toList(),
                           )

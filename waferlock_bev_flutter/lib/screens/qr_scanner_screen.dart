@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
@@ -13,18 +15,26 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
-  late MobileScannerController controller;
+  MobileScannerController? controller;
   bool _isProcessing = false;
+  
+  /// Returns true if QR scanning is supported on this platform (iOS/Android only)
+  bool get _isScannerSupported {
+    if (kIsWeb) return false;
+    return Platform.isIOS || Platform.isAndroid;
+  }
 
   @override
   void initState() {
     super.initState();
-    controller = MobileScannerController();
+    if (_isScannerSupported) {
+      controller = MobileScannerController();
+    }
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    controller?.dispose();
     super.dispose();
   }
 
@@ -87,6 +97,52 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Show unsupported message on non-mobile platforms
+    if (!_isScannerSupported) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('掃描 QR 碼'),
+          centerTitle: true,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.qr_code_scanner,
+                  size: 64,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'QR 碼掃描功能僅支援 iOS 和 Android 平台',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '請使用手機或平板開啟此應用程式進行掃描',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey.shade500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('返回'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('掃描 QR 碼'),
@@ -95,7 +151,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       body: Stack(
         children: [
           MobileScanner(
-            controller: controller,
+            controller: controller!,
             onDetect: (capture) {
               final List<Barcode> barcodes = capture.barcodes;
               for (final barcode in barcodes) {
@@ -113,11 +169,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               decoration: BoxDecoration(
                 border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
                 borderRadius: BorderRadius.circular(16),
-              ),
-              child: Stack(
-                children: [
-                    // Corner markers could go here but simple border is fine
-                ],
               ),
             ),
           ),
